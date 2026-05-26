@@ -10,9 +10,18 @@
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, hyprland, ... }: {
+  outputs = { self, nixpkgs, home-manager, ... }: {
     nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
+      modules = [
+        ./src/hosts/default.nix
+        home-manager.nixosModules.home-manager
+        {
+          home-manager.useGlobalPkgs    = true;
+          home-manager.useUserPackages  = true;
+          home-manager.users.qFioofa    = import ./src/home/default.nix;
+        }
+      ];
     };
   };
 }
