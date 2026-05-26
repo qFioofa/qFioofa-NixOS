@@ -3,15 +3,16 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs }: {
-    nixosConfigurations.myhost = nixpkgs.lib.nixosSystem {
+  outputs = { self, nixpkgs, home-manager, hyprland, ... }: {
+    nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
-      modules = [
-        ./src/configuration.nix
-        ./src/hardware-configuration.nix
-      ];
     };
   };
 }
