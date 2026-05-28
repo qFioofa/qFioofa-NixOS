@@ -1,5 +1,5 @@
 { pkgs, ... }: {
   environment.systemPackages = with pkgs; [
-    git  gh  lazygit  git-delta
+    git  gh  lazygit
   ];
 }

@@ -1,5 +1,5 @@
 { pkgs, ... }: {
-  home.packages = [ pkgs.rofi-wayland ];
+  home.packages = [ pkgs.rofi ];
 
   xdg.configFile."rofi/config.rasi".text = ''
     configuration {
