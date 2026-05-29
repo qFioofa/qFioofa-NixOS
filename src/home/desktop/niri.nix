@@ -1,4 +1,6 @@
 { config, ... }: {
+  home.file."Pictures/wallpaper.jpg".source = ../../../pictures/wallpaper.jpg;
+
   xdg.configFile."niri/config.kdl".text = ''
     input {
         keyboard {
@@ -37,8 +39,6 @@
 
     screenshot-path "~/Pictures/%Y-%m-%dT%H:%M:%S.png"
 
-    spawn-at-startup "waybar"
-    spawn-at-startup "mako"
     spawn-at-startup "swaybg" "-m" "fill" "-i" "${config.home.homeDirectory}/Pictures/wallpaper.jpg"
 
     environment {

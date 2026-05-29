@@ -14,7 +14,6 @@
 
   boot.kernelModules = [
     "kvm-intel"
-    "kvm-amd"
     "huawei-wmi"
   ];
 
@@ -23,7 +22,6 @@
   boot.extraModulePackages = [ ];
 
   hardware.cpu.intel.updateMicrocode = lib.mkDefault true;
-  hardware.cpu.amd.updateMicrocode   = lib.mkDefault true;
 
   hardware.enableRedistributableFirmware = true;
 
