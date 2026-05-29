@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, pkgs, ... }:
 let
   # Reference the wallpaper by its nix-store path. This is immutable and always
   # present when the config is generated, so the wallpaper can never fail to
@@ -8,6 +8,23 @@ in {
   # Keep a user-editable copy in ~/Pictures for convenience (swaybg below does
   # NOT depend on it — it reads the store path directly).
   home.file."Pictures/wallpaper.jpg".source = wallpaper;
+
+  # Wallpaper as a systemd user service bound to niri's graphical-session.target
+  # — exactly like waybar and mako. Started once by the session, restarted if it
+  # dies. This replaces the old niri `spawn-at-startup "swaybg"` so the wallpaper
+  # is managed the same way as every other session component (no double-spawn).
+  systemd.user.services.swaybg = {
+    Unit = {
+      Description = "swaybg wallpaper";
+      PartOf      = [ "graphical-session.target" ];
+      After       = [ "graphical-session.target" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.swaybg}/bin/swaybg -m fill -i ${wallpaper}";
+      Restart   = "on-failure";
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+  };
 
   xdg.configFile."niri/config.kdl".text = ''
     // ─── Input ────────────────────────────────────────────────────────────
@@ -53,10 +70,10 @@ in {
     screenshot-path "~/Pictures/%Y-%m-%dT%H:%M:%S.png"
 
     // ─── Startup ──────────────────────────────────────────────────────────
-    // Only the wallpaper is spawned here. waybar and mako run as systemd user
-    // services (programs.waybar.systemd.enable / services.mako) bound to
-    // niri's graphical-session.target — do NOT spawn them here or you get two.
-    spawn-at-startup "swaybg" "-m" "fill" "-i" "${wallpaper}"
+    // NOTHING is spawned from niri. waybar, mako and swaybg (wallpaper) all run
+    // as systemd user services bound to graphical-session.target (see waybar.nix,
+    // mako.nix and the swaybg service above). Spawning any of them here too would
+    // start a second copy — that was the cause of the "double waybar".
 
     environment {
         QT_QPA_PLATFORM "wayland"
