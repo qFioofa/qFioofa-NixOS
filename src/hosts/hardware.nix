@@ -31,13 +31,13 @@
   };
 
   fileSystems."/" = {
-    device  = "/dev/disk/by-uuid/61fd39f4-3c2f-4b85-a113-3578ea0900e1";
+    device  = "/dev/disk/by-label/NIXOS_ROOT";
     fsType  = "ext4";
     options = [ "noatime" "errors=remount-ro" ];
   };
 
   fileSystems."/boot" = {
-    device  = "/dev/disk/by-uuid/5F92-416F";
+    device  = "/dev/disk/by-label/NIXOS_BOOT";
     fsType  = "vfat";
     options = [ "fmask=0077" "dmask=0077" ];
   };
