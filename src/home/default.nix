@@ -8,6 +8,10 @@
     ./desktop/waybar.nix
     ./desktop/rofi.nix
     ./desktop/mako.nix
+    ./desktop/idle.nix
+    ./desktop/clipboard.nix
+    ./desktop/screenshot.nix
+    ./desktop/media.nix
   ];
 
   home = {

@@ -8,6 +8,7 @@
     ../modules/system/bluetooth.nix
     ../modules/system/users.nix
     ../modules/desktop/niri.nix
+    ../modules/desktop/xwayland.nix
     ../modules/desktop/fonts.nix
     ../modules/desktop/portals.nix
     ../modules/apps/default.nix

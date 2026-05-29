@@ -19,7 +19,11 @@
         {
           home-manager.useGlobalPkgs    = true;
           home-manager.useUserPackages  = true;
-          home-manager.users.qFioofa    = import ./src/home/default.nix;
+          # Back up (instead of refusing to overwrite) any pre-existing real
+          # files that home-manager wants to manage — e.g. a hand-written
+          # ~/.config/niri/config.kdl from before this repo took over.
+          home-manager.backupFileExtension = "backup";
+          home-manager.users.qFioofa       = import ./src/home/default.nix;
         }
       ];
     };

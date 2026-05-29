@@ -1,7 +1,16 @@
-{ config, ... }: {
-  home.file."Pictures/wallpaper.jpg".source = ../../../pictures/wallpaper.jpg;
+{ config, ... }:
+let
+  # Reference the wallpaper by its nix-store path. This is immutable and always
+  # present when the config is generated, so the wallpaper can never fail to
+  # load because of a missing or not-yet-copied ~/Pictures file.
+  wallpaper = ../../../pictures/wallpaper.jpg;
+in {
+  # Keep a user-editable copy in ~/Pictures for convenience (swaybg below does
+  # NOT depend on it — it reads the store path directly).
+  home.file."Pictures/wallpaper.jpg".source = wallpaper;
 
   xdg.configFile."niri/config.kdl".text = ''
+    // ─── Input ────────────────────────────────────────────────────────────
     input {
         keyboard {
             xkb { layout "us" }
@@ -15,6 +24,7 @@
         }
     }
 
+    // ─── Layout ───────────────────────────────────────────────────────────
     layout {
         gaps 8
 
@@ -37,19 +47,27 @@
 
     prefer-no-csd
 
+    // Don't pop the keybind cheat-sheet on every login.
+    hotkey-overlay { skip-at-startup; }
+
     screenshot-path "~/Pictures/%Y-%m-%dT%H:%M:%S.png"
 
-    spawn-at-startup "swaybg" "-m" "fill" "-i" "${config.home.homeDirectory}/Pictures/wallpaper.jpg"
+    // ─── Startup ──────────────────────────────────────────────────────────
+    // Only the wallpaper is spawned here. waybar and mako run as systemd user
+    // services (programs.waybar.systemd.enable / services.mako) bound to
+    // niri's graphical-session.target — do NOT spawn them here or you get two.
+    spawn-at-startup "swaybg" "-m" "fill" "-i" "${wallpaper}"
 
     environment {
         QT_QPA_PLATFORM "wayland"
         NIXOS_OZONE_WL  "1"
     }
 
+    // ─── Keybinds ─────────────────────────────────────────────────────────
     binds {
-        Mod+Return { spawn "ghostty"; }
-        Mod+D      { spawn "rofi" "-show" "drun"; }
-        Mod+Q      { close-window; }
+        Mod+Return  { spawn "ghostty"; }
+        Mod+D       { spawn "rofi" "-show" "drun"; }
+        Mod+Q       { close-window; }
         Mod+Shift+Q { quit; }
 
         // focus
@@ -69,16 +87,17 @@
         Mod+Shift+K { move-window-up; }
 
         // resize
-        Mod+Minus { set-column-width "-10%"; }
-        Mod+Equal { set-column-width "+10%"; }
+        Mod+Minus       { set-column-width "-10%"; }
+        Mod+Equal       { set-column-width "+10%"; }
         Mod+Shift+Minus { set-window-height "-10%"; }
         Mod+Shift+Equal { set-window-height "+10%"; }
 
         // layout
-        Mod+F        { maximize-column; }
-        Mod+Shift+F  { fullscreen-window; }
-        Mod+C        { center-column; }
-        Mod+R        { switch-preset-column-width; }
+        Mod+F       { maximize-column; }
+        Mod+Shift+F { fullscreen-window; }
+        Mod+C       { center-column; }
+        Mod+R       { switch-preset-column-width; }
+        Mod+Space   { toggle-window-floating; }
 
         // workspaces
         Mod+1 { focus-workspace 1; }
@@ -102,9 +121,9 @@
         Mod+Shift+9 { move-window-to-workspace 9; }
 
         // screenshot
-        Print                  { screenshot; }
-        Ctrl+Print             { screenshot-window; }
-        Alt+Print              { screenshot-screen; }
+        Print      { screenshot; }
+        Ctrl+Print { screenshot-window; }
+        Alt+Print  { screenshot-screen; }
 
         // media / brightness
         XF86AudioRaiseVolume  allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+"; }
@@ -112,8 +131,24 @@
         XF86AudioMute         allow-when-locked=true { spawn "wpctl" "set-mute"   "@DEFAULT_AUDIO_SINK@" "toggle"; }
         XF86MonBrightnessUp   { spawn "brightnessctl" "set" "5%+"; }
         XF86MonBrightnessDown { spawn "brightnessctl" "set" "5%-"; }
+
+        // media playback (playerctl → any MPRIS player)
+        XF86AudioPlay  { spawn "playerctl" "play-pause"; }
+        XF86AudioPause { spawn "playerctl" "play-pause"; }
+        XF86AudioNext  { spawn "playerctl" "next"; }
+        XF86AudioPrev  { spawn "playerctl" "previous"; }
+
+        // clipboard history picker (cliphist via rofi)
+        Mod+V { spawn "sh" "-c" "cliphist list | rofi -dmenu | cliphist decode | wl-copy"; }
+
+        // annotated region screenshot (grim + slurp + satty)
+        Mod+Shift+S { spawn "sh" "-c" "grim -g \"$(slurp)\" - | satty --filename -"; }
+
+        // manual lock
+        Mod+Escape { spawn "swaylock" "-f"; }
     }
 
+    // ─── Window rules ─────────────────────────────────────────────────────
     window-rule {
         match app-id="pavucontrol"
         match app-id="blueman-manager"
