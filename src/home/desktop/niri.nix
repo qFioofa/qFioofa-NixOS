@@ -1,30 +1,22 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 let
   # Reference the wallpaper by its nix-store path. This is immutable and always
   # present when the config is generated, so the wallpaper can never fail to
   # load because of a missing or not-yet-copied ~/Pictures file.
   wallpaper = ../../../pictures/wallpaper.jpg;
+
+  # ─── yugen-ash (main variant) palette ─────────────────────────────────────
+  bg       = "#151515";
+  surface  = "#303030";
+  primary  = "#FFBE89";
+  coral    = "#FF9E8B";
 in {
   # Keep a user-editable copy in ~/Pictures for convenience (swaybg below does
   # NOT depend on it — it reads the store path directly).
   home.file."Pictures/wallpaper.jpg".source = wallpaper;
 
-  # Wallpaper as a systemd user service bound to niri's graphical-session.target
-  # — exactly like waybar and mako. Started once by the session, restarted if it
-  # dies. This replaces the old niri `spawn-at-startup "swaybg"` so the wallpaper
-  # is managed the same way as every other session component (no double-spawn).
-  systemd.user.services.swaybg = {
-    Unit = {
-      Description = "swaybg wallpaper";
-      PartOf      = [ "graphical-session.target" ];
-      After       = [ "graphical-session.target" ];
-    };
-    Service = {
-      ExecStart = "${pkgs.swaybg}/bin/swaybg -m fill -i ${wallpaper}";
-      Restart   = "on-failure";
-    };
-    Install.WantedBy = [ "graphical-session.target" ];
-  };
+  # swaybg needs to be on PATH for the niri spawn-at-startup below.
+  home.packages = [ pkgs.swaybg ];
 
   xdg.configFile."niri/config.kdl".text = ''
     // ─── Input ────────────────────────────────────────────────────────────
@@ -39,11 +31,18 @@ in {
             tap
             dwt
         }
+        focus-follows-mouse max-scroll-amount="0%"
     }
 
     // ─── Layout ───────────────────────────────────────────────────────────
     layout {
-        gaps 8
+        gaps 10
+
+        // Empty-workspace / between-window backdrop matches the theme base so
+        // there is never a jarring black flash behind the wallpaper or windows.
+        background-color "${bg}"
+
+        center-focused-column "never"
 
         preset-column-widths {
             proportion 0.33333
@@ -53,13 +52,28 @@ in {
 
         default-column-width { proportion 0.5; }
 
+        // Warm yugen-ash accent ring, fading from primary → coral.
         focus-ring {
-            width 2
-            active-color "#cba6f7"
-            inactive-color "#313244"
+            width 3
+            active-gradient   from="${primary}" to="${coral}" angle=45
+            inactive-color    "${surface}"
         }
 
         border { off }
+
+        // Soft drop shadow gives windows depth against the wallpaper.
+        shadow {
+            on
+            softness 30
+            spread   5
+            offset x=0 y=5
+            color "#00000070"
+        }
+
+        // Subtle accent strip shown where a moved window will land.
+        insert-hint {
+            gradient from="${primary}" to="${coral}" angle=45
+        }
     }
 
     prefer-no-csd
@@ -70,19 +84,27 @@ in {
     screenshot-path "~/Pictures/%Y-%m-%dT%H:%M:%S.png"
 
     // ─── Startup ──────────────────────────────────────────────────────────
-    // NOTHING is spawned from niri. waybar, mako and swaybg (wallpaper) all run
-    // as systemd user services bound to graphical-session.target (see waybar.nix,
-    // mako.nix and the swaybg service above). Spawning any of them here too would
-    // start a second copy — that was the cause of the "double waybar".
+    // waybar and mako run as systemd user services bound to
+    // graphical-session.target (see waybar.nix / mako.nix) — do NOT spawn them
+    // here too or you get a second copy (that was the old "double waybar").
+    //
+    // The wallpaper IS spawned here on purpose: the systemd-service approach
+    // proved unreliable on niri (the unit didn't always start with the
+    // session, so no wallpaper showed). spawn-at-startup is the method niri
+    // documents and it runs exactly one swaybg as a child of the compositor.
+    spawn-at-startup "swaybg" "-m" "fill" "-i" "${wallpaper}"
 
     environment {
         QT_QPA_PLATFORM "wayland"
         NIXOS_OZONE_WL  "1"
+        TERMINAL        "terminal"
     }
 
     // ─── Keybinds ─────────────────────────────────────────────────────────
     binds {
-        Mod+Return  { spawn "ghostty"; }
+        // `terminal` picks ghostty if present, else falls back (wezterm →
+        // alacritty → foot → …). See src/home/apps/terminal.nix.
+        Mod+Return  { spawn "terminal"; }
         Mod+D       { spawn "rofi" "-show" "drun"; }
         Mod+Q       { close-window; }
         Mod+Shift+Q { quit; }
@@ -166,6 +188,12 @@ in {
     }
 
     // ─── Window rules ─────────────────────────────────────────────────────
+    // Rounded corners on every window, clipped so content follows the radius.
+    window-rule {
+        geometry-corner-radius 10
+        clip-to-geometry true
+    }
+
     window-rule {
         match app-id="pavucontrol"
         match app-id="blueman-manager"
