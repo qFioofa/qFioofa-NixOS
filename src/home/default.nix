@@ -7,12 +7,14 @@
     ./apps/terminals
     ./desktop/niri.nix
     ./desktop/waybar.nix
-    ./desktop/rofi.nix
+    ./desktop/fuzzel.nix
     ./desktop/mako.nix
     ./desktop/idle.nix
     ./desktop/clipboard.nix
     ./desktop/screenshot.nix
     ./desktop/media.nix
+    ./desktop/polkit.nix
+    ./desktop/theme.nix
   ];
 
   home = {

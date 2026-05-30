@@ -1,21 +1,24 @@
 { pkgs, ... }: {
   # ── Idle & screen lock ────────────────────────────────────────────────
   # swayidle watches for inactivity; swaylock is the actual lock screen
-  # (Catppuccin Mocha colors). Locks the screen after 5 min, powers off the
-  # monitors after 10 min, and also locks right before the system suspends.
-  # Manual lock is bound to Mod+Escape in niri.nix.
+  # (yugen-ash colors — matches niri.nix / waybar). Locks the screen after
+  # 5 min, powers off the monitors after 10 min, and also locks right before
+  # the system suspends. Manual lock is bound to Mod+Escape in niri.nix.
+  #
+  # NOTE: swaylock can only verify the password because the system enables the
+  # PAM service `security.pam.services.swaylock` (see modules/desktop/niri.nix).
   programs.swaylock = {
     enable = true;
     settings = {
-      color                = "1e1e2e";
-      inside-color         = "1e1e2e";
-      ring-color           = "cba6f7";
-      key-hl-color         = "a6e3a1";
-      line-color           = "1e1e2e";
-      separator-color      = "1e1e2e";
-      text-color           = "cdd6f4";
-      inside-wrong-color   = "f38ba8";
-      ring-wrong-color     = "f38ba8";
+      color                = "151515";
+      inside-color         = "151515";
+      ring-color           = "FFBE89";
+      key-hl-color         = "7EAB8E";
+      line-color           = "151515";
+      separator-color      = "151515";
+      text-color           = "D4D4D4";
+      inside-wrong-color   = "F57A7A";
+      ring-wrong-color     = "F57A7A";
       indicator-radius     = 100;
       indicator-thickness  = 10;
       show-failed-attempts = true;

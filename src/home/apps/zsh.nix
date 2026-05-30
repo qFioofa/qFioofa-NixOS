@@ -17,7 +17,8 @@
       ngc = "sudo nix-collect-garbage -d";
     };
 
-    initExtra = ''
+    # `initExtra` was replaced by `initContent` in current home-manager.
+    initContent = ''
       eval "$(zoxide init zsh --cmd cd)"
       eval "$(starship init zsh)"
     '';
@@ -28,13 +29,14 @@
     settings = {
       add_newline = true;
       format      = "$directory$git_branch$git_status$nix_shell$line_break$character";
+      # yugen-ash palette — matches the desktop rice.
       character   = {
-        success_symbol = "[❯](bold #a6e3a1)";
-        error_symbol   = "[❯](bold #f38ba8)";
+        success_symbol = "[❯](bold #7EAB8E)";
+        error_symbol   = "[❯](bold #F57A7A)";
       };
-      directory   = { style = "bold #89b4fa"; truncation_length = 4; };
-      git_branch  = { symbol = " "; style = "bold #cba6f7"; };
-      nix_shell   = { symbol = " "; style = "bold #89b4fa"; };
+      directory   = { style = "bold #79A0AA"; truncation_length = 4; };
+      git_branch  = { symbol = " "; style = "bold #FFBE89"; };
+      nix_shell   = { symbol = " "; style = "bold #79A0AA"; };
     };
   };
 }

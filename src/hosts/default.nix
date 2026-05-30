@@ -11,6 +11,7 @@
     ../modules/desktop/xwayland.nix
     ../modules/desktop/fonts.nix
     ../modules/desktop/portals.nix
+    ../modules/desktop/keyd.nix
     ../modules/apps/default.nix
   ];
 

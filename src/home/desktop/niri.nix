@@ -85,6 +85,13 @@ in {
 
     prefer-no-csd
 
+    // Cursor theme/size. Matches home.pointerCursor in theme.nix; set here too
+    // so niri applies it directly instead of relying on XCURSOR_* env import.
+    cursor {
+        xcursor-theme "Bibata-Modern-Classic"
+        xcursor-size 24
+    }
+
     // Themed empty-space color shown in the overview / behind everything when
     // there is no wallpaper surface to draw. Safe here (does NOT cover swaybg).
     overview {
@@ -129,7 +136,10 @@ in {
         // `terminal` picks ghostty if present, else falls back (wezterm →
         // alacritty → foot → …). See src/home/apps/terminals/.
         Mod+Return  { spawn "terminal"; }
-        Mod+D       { spawn "rofi" "-show" "drun"; }
+        Mod+D       { spawn "fuzzel"; }
+        // Tapping the Win key alone emits F13 (via keyd, see modules/desktop/
+        // keyd.nix) → opens the same centered minimalist fuzzel launcher.
+        F13         { spawn "fuzzel"; }
         Mod+Q       { close-window; }
         Mod+Shift+Q { quit; }
 
@@ -201,8 +211,8 @@ in {
         XF86AudioNext  { spawn "playerctl" "next"; }
         XF86AudioPrev  { spawn "playerctl" "previous"; }
 
-        // clipboard history picker (cliphist via rofi)
-        Mod+V { spawn "sh" "-c" "cliphist list | rofi -dmenu | cliphist decode | wl-copy"; }
+        // clipboard history picker (cliphist via fuzzel --dmenu)
+        Mod+V { spawn "sh" "-c" "cliphist list | fuzzel --dmenu | cliphist decode | wl-copy"; }
 
         // annotated region screenshot (grim + slurp + satty)
         Mod+Shift+S { spawn "sh" "-c" "grim -g \"$(slurp)\" - | satty --filename -"; }
