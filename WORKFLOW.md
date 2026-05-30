@@ -35,6 +35,7 @@ qFioofa-NixOS/
         ├── default.nix
         ├── apps/
         │   ├── nvim.nix
+        │   ├── terminals/       # default.nix, palette.nix, ghostty/alacritty/foot/wezterm
         │   ├── tmux.nix
         │   ├── zsh.nix
         │   └── git.nix

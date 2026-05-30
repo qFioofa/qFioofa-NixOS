@@ -4,7 +4,7 @@
     ./apps/tmux.nix
     ./apps/zsh.nix
     ./apps/git.nix
-    ./apps/terminal.nix
+    ./apps/terminals
     ./desktop/niri.nix
     ./desktop/waybar.nix
     ./desktop/rofi.nix

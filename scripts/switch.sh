@@ -13,6 +13,8 @@ echo ":: clearing stale home-manager backups…"
 rm -f \
   "$HOME/.config/niri/config.kdl.backup" \
   "$HOME/.config/ghostty/config.backup" \
+  "$HOME/.config/ghostty/themes/yugen-ash.conf.backup" \
+  "$HOME/.config/ghostty/shaders/cursor.glsl.backup" \
   "$HOME/.config/alacritty/alacritty.toml.backup" \
   "$HOME/.config/foot/foot.ini.backup" \
   "$HOME/.config/wezterm/wezterm.lua.backup"

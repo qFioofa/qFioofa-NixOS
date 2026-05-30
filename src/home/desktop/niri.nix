@@ -22,7 +22,12 @@ in {
     // ─── Input ────────────────────────────────────────────────────────────
     input {
         keyboard {
-            xkb { layout "us" }
+            // us + ru layouts; Shift+Alt cycles between them.
+            // ctrl:nocaps turns Caps Lock into another Ctrl.
+            xkb {
+                layout "us,ru"
+                options "grp:alt_shift_toggle,ctrl:nocaps"
+            }
             repeat-delay 200
             repeat-rate 30
         }
@@ -38,9 +43,11 @@ in {
     layout {
         gaps 10
 
-        // Empty-workspace / between-window backdrop matches the theme base so
-        // there is never a jarring black flash behind the wallpaper or windows.
-        background-color "${bg}"
+        // MUST stay transparent. niri paints this color as an OPAQUE layer over
+        // the swaybg wallpaper surface, so any solid value here hides the
+        // wallpaper completely — that was the "wallpaper never shows" bug.
+        // The themed base color is used for the overview backdrop instead (below).
+        background-color "transparent"
 
         center-focused-column "never"
 
@@ -78,6 +85,20 @@ in {
 
     prefer-no-csd
 
+    // Themed empty-space color shown in the overview / behind everything when
+    // there is no wallpaper surface to draw. Safe here (does NOT cover swaybg).
+    overview {
+        backdrop-color "${bg}"
+    }
+
+    // Push the swaybg surface into niri's backdrop so it renders behind every
+    // workspace (and shows through in the overview). swaybg's layer-shell
+    // namespace is "wallpaper"; verify with `niri msg layers` if it ever moves.
+    layer-rule {
+        match namespace="^wallpaper$"
+        place-within-backdrop true
+    }
+
     // Don't pop the keybind cheat-sheet on every login.
     hotkey-overlay { skip-at-startup; }
 
@@ -92,7 +113,10 @@ in {
     // proved unreliable on niri (the unit didn't always start with the
     // session, so no wallpaper showed). spawn-at-startup is the method niri
     // documents and it runs exactly one swaybg as a child of the compositor.
-    spawn-at-startup "swaybg" "-m" "fill" "-i" "${wallpaper}"
+    //
+    // Use the absolute store path to swaybg so it can never fail to launch
+    // because the session PATH didn't include the home-manager profile.
+    spawn-at-startup "${pkgs.swaybg}/bin/swaybg" "-m" "fill" "-i" "${wallpaper}"
 
     environment {
         QT_QPA_PLATFORM "wayland"
@@ -103,7 +127,7 @@ in {
     // ─── Keybinds ─────────────────────────────────────────────────────────
     binds {
         // `terminal` picks ghostty if present, else falls back (wezterm →
-        // alacritty → foot → …). See src/home/apps/terminal.nix.
+        // alacritty → foot → …). See src/home/apps/terminals/.
         Mod+Return  { spawn "terminal"; }
         Mod+D       { spawn "rofi" "-show" "drun"; }
         Mod+Q       { close-window; }
