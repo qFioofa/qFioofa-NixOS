@@ -5,10 +5,10 @@
     settings = {
       anchor = "top-right";
       default-timeout = 5000;
-      background-color = "#1e1e2e";
-      text-color = "#cdd6f4";
-      border-color = "#7aa2f7";
-      border-radius = 6;
+      background-color = "#151515";
+      text-color = "#D4D4D4";
+      border-color = "#FFBE89";
+      border-radius = 8;
       border-size = 2;
     };
   };

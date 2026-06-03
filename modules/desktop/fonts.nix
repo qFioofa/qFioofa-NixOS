@@ -2,7 +2,7 @@
 {
   fonts.packages = with pkgs; [
     noto-fonts
-    noto-fonts-emoji
+    noto-fonts-color-emoji
     nerd-fonts.jetbrains-mono
   ];
 

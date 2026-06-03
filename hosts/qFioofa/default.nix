@@ -6,7 +6,7 @@
     ./user.nix
   ];
 
-  networking.hostName = "nixos";
+  networking.hostName = "qFioofa";
 
   system.stateVersion = "24.11";
 }

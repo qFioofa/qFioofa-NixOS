@@ -8,8 +8,8 @@
         pad = "8x8";
       };
       colors = {
-        background = "1e1e2e";
-        foreground = "cdd6f4";
+        background = "151515";
+        foreground = "D4D4D4";
       };
     };
   };

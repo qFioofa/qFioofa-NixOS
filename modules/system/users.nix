@@ -1,12 +1,6 @@
-{ pkgs, ... }:
+{ ... }:
 {
-  users.users.qFioofa = {
-    isNormalUser = true;
-    description = "qFioofa";
-    extraGroups = [ "wheel" "networkmanager" "video" ];
-    shell = pkgs.zsh;
-    initialPassword = "nixos";
-  };
+  programs.zsh.enable = true;
 
   nixpkgs.config.allowUnfree = true;
 

@@ -1,5 +1,5 @@
 {
-  description = "qFioofa NixOS configuration — simple niri desktop";
+  description = "qFioofa NixOS configuration";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -23,6 +23,16 @@
         niri.nixosModules.niri
         home-manager.nixosModules.home-manager
         ./hosts/default/default.nix
+      ];
+    };
+
+    nixosConfigurations.qFioofa = nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
+      specialArgs = { inherit inputs; };
+      modules = [
+        niri.nixosModules.niri
+        home-manager.nixosModules.home-manager
+        ./hosts/qFioofa/default.nix
       ];
     };
   };
