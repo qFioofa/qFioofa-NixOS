@@ -3,8 +3,8 @@
 {
   home.packages = with pkgs; [
     git
-	curl
-	wget
-	bat
+    curl
+    wget
+    bat
   ];
 }

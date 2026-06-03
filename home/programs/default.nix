@@ -9,5 +9,6 @@
     ./configSpec
     ./cLangUtils.nix
     ./cli.nix
+    ./ai
   ];
 }
