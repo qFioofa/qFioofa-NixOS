@@ -4,7 +4,7 @@
     enable = true;
     settings = {
       main = {
-        font = "JetBrainsMono Nerd Font:size=11";
+        font = "JetBrainsMono Nerd Font:size=14";
         pad = "8x8";
       };
       colors = {

@@ -168,7 +168,7 @@
       "Shift+Tab".action = switch-layout "next";
 
       # Launch
-      "Mod+Return".action = spawn "foot";
+      "Mod+Return".action = spawn "ghostty";
       "Mod+D".action = spawn "rofi" "-show" "drun";
       "Mod+Q".action = close-window;
 

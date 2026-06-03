@@ -2,6 +2,7 @@
 {
   imports = [
     ./terminal.nix
+    ./ghostty.nix
     ./apps.nix
     ./office.nix
     ./progLangs.nix

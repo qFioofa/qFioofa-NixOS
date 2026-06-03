@@ -13,6 +13,9 @@
       url = "github:sodiboo/niri-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Ghostty config — provides homeManagerModules.default that links src/ to ~/.config/ghostty
+    ghostty-config.url = "github:qFioofa/qFioofa-Ghostty";
   };
 
   outputs = inputs@{ self, nixpkgs, home-manager, niri, ... }: {

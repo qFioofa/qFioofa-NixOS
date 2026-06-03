@@ -1,5 +1,20 @@
 {
   "nodes": {
+    "ghostty-config": {
+      "locked": {
+        "lastModified": 1780486856,
+        "narHash": "sha256-sNK5F57AAMDb8sMA2E8F1n7FxYUi0mdIutauWnnUrpg=",
+        "owner": "qFioofa",
+        "repo": "qFioofa-Ghostty",
+        "rev": "ad6c0954c256db53fef3fa7b34df88fc4979b911",
+        "type": "github"
+      },
+      "original": {
+        "owner": "qFioofa",
+        "repo": "qFioofa-Ghostty",
+        "type": "github"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -112,6 +127,7 @@
     },
     "root": {
       "inputs": {
+        "ghostty-config": "ghostty-config",
         "home-manager": "home-manager",
         "niri": "niri",
         "nixpkgs": "nixpkgs"
