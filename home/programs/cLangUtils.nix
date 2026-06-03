@@ -4,5 +4,6 @@
     clang-tools
 	  gnumake
 	  cmakeCurses
+    valgrind
   ];
 }
