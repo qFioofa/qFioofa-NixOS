@@ -17,7 +17,10 @@
     };
 
     # -- Input --
-    input.keyboard.xkb.layout = "us";
+    input.keyboard.xkb = {
+      layout = "us,ru";
+      options = "ctrl:nocaps";
+    };
     input.touchpad = {
       tap = true;
       natural-scroll = true;
@@ -161,6 +164,9 @@
 
     # -- Keybindings --
     binds = with config.lib.niri.actions; {
+      # Keyboard layout
+      "Shift+Tab".action = switch-layout "next";
+
       # Launch
       "Mod+Return".action = spawn "foot";
       "Mod+D".action = spawn "rofi" "-show" "drun";

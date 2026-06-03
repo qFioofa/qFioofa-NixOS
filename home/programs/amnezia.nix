@@ -1,4 +1,4 @@
 { ... }:
 {
-  # TODO: amnezia VPN client setup
+  # AmneziaVPN is configured at the system level (modules/system/amnezia.nix).
 }
