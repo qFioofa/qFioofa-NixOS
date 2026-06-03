@@ -6,7 +6,6 @@
     rustc
     cargo
     gcc
-    clang
     go
   ];
 }

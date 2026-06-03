@@ -2,7 +2,7 @@
 {
   imports = [
     ./desktop
-    ./programmes
+    ./programs
   ];
 
   home.username = "qFioofa";

@@ -1,8 +1,8 @@
 { ... }:
 {
   imports = [
-    ../../home/programmes/configSpec/zsh.nix
-    ../../home/programmes/configSpec/tmux.nix
+    ../../home/programs/configSpec/zsh.nix
+    ../../home/programs/configSpec/tmux.nix
   ];
 
   home.username = "root";
