@@ -130,7 +130,41 @@
         "ghostty-config": "ghostty-config",
         "home-manager": "home-manager",
         "niri": "niri",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "tmux-config": "tmux-config",
+        "wezterm-config": "wezterm-config",
+        "zsh-config": "zsh-config"
+      }
+    },
+    "tmux-config": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1773070000,
+        "narHash": "sha256-Q3jd9yHjBB6K+P9935hXUqeYZjaQXsuKwJJESrqyV64=",
+        "owner": "qFioofa",
+        "repo": "qFioofa-tmux",
+        "rev": "a1714884ea5c79487729f9c27fcd4d7047c6e7f6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "qFioofa",
+        "repo": "qFioofa-tmux",
+        "type": "github"
+      }
+    },
+    "wezterm-config": {
+      "locked": {
+        "lastModified": 1780569986,
+        "narHash": "sha256-gjqU5uoCKoY5LPUAEYMN8TSqTGzNSD9V7MmFIA+bUmg=",
+        "owner": "qFioofa",
+        "repo": "qFioofa-wezterm",
+        "rev": "217f002f926dac1968dea07755dad7e0f2d977db",
+        "type": "github"
+      },
+      "original": {
+        "owner": "qFioofa",
+        "repo": "qFioofa-wezterm",
+        "type": "github"
       }
     },
     "xwayland-satellite-stable": {
@@ -163,6 +197,21 @@
       "original": {
         "owner": "Supreeeme",
         "repo": "xwayland-satellite",
+        "type": "github"
+      }
+    },
+    "zsh-config": {
+      "locked": {
+        "lastModified": 1780570010,
+        "narHash": "sha256-FUDYtIGgqyvqVUh9AJkvOIdtNIHFa/rPLOJrSoXziFc=",
+        "owner": "qFioofa",
+        "repo": "qFioofa-zsh",
+        "rev": "1aa8c754823a615299e8f40ed638ac2f70205946",
+        "type": "github"
+      },
+      "original": {
+        "owner": "qFioofa",
+        "repo": "qFioofa-zsh",
         "type": "github"
       }
     }
