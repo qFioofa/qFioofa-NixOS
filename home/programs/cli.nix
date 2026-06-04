@@ -17,5 +17,6 @@
     unzip
     zip
     p7zip
+    playerctl
   ];
 }

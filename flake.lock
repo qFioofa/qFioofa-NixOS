@@ -109,6 +109,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-nvim": {
+      "locked": {
+        "lastModified": 1774610258,
+        "narHash": "sha256-HaThtroVD9wRdx7KQk0B75JmFcXlMUoEdDFNOMOlsOs=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "832efc09b4caf6b4569fbf9dc01bec3082a00611",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "832efc09b4caf6b4569fbf9dc01bec3082a00611",
+        "type": "github"
+      }
+    },
     "nixpkgs-stable": {
       "locked": {
         "lastModified": 1779796641,
@@ -131,19 +147,19 @@
         "home-manager": "home-manager",
         "niri": "niri",
         "nixpkgs": "nixpkgs",
+        "nixpkgs-nvim": "nixpkgs-nvim",
         "tmux-config": "tmux-config",
         "wezterm-config": "wezterm-config",
         "zsh-config": "zsh-config"
       }
     },
     "tmux-config": {
-      "flake": false,
       "locked": {
-        "lastModified": 1773070000,
-        "narHash": "sha256-Q3jd9yHjBB6K+P9935hXUqeYZjaQXsuKwJJESrqyV64=",
+        "lastModified": 1780571668,
+        "narHash": "sha256-gRooYdCRhn0x0hyHHiksViHD562M3hv+OFOVyU/0rH0=",
         "owner": "qFioofa",
         "repo": "qFioofa-tmux",
-        "rev": "a1714884ea5c79487729f9c27fcd4d7047c6e7f6",
+        "rev": "3fe834303eb129297656fe1058d602dcee5f2ea5",
         "type": "github"
       },
       "original": {
