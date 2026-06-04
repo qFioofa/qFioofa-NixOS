@@ -19,7 +19,8 @@
     # -- Input --
     input.keyboard.xkb = {
       layout = "us,ru";
-      options = "ctrl:nocaps";
+      # ctrl:nocaps -> Caps acts as Ctrl; grp toggle -> Left Alt+Shift switches layout
+      options = "ctrl:nocaps,grp:lalt_lshift_toggle";
     };
     input.touchpad = {
       tap = true;
@@ -164,8 +165,7 @@
 
     # -- Keybindings --
     binds = with config.lib.niri.actions; {
-      # Keyboard layout
-      "Shift+Tab".action = switch-layout "next";
+      # Keyboard layout switching is handled by XKB (Left Alt+Shift, see input.keyboard.xkb)
 
       # Launch
       "Mod+Return".action = spawn "ghostty";
