@@ -1,18 +1,10 @@
 { pkgs, ... }:
 let
-  bg = "#151515";
-  bgSurface = "#303030";
-  fg = "#D4D4D4";
-  fgDim = "#A9A9A9";
-  fgMuted = "#696969";
-  primary = "#FFBE89";
-  success = "#7EAB8E";
-  warning = "#FFF2AF";
-  error = "#F57A7A";
-  violet = "#c678dd";
-  tide = "#79a0aa";
-  amber = "#D4A76A";
-  coral = "#FF9E8B";
+  theme = import ../../theme.nix;
+  inherit (theme)
+    bg bgSurface fg fgDim fgMuted
+    primary success warning error
+    violet tide amber coral;
 in
 {
   programs.waybar = {
@@ -26,43 +18,42 @@ in
       margin-left = 8;
       margin-right = 8;
 
-      modules-left = [
-        "niri/workspaces"
-        "niri/window"
-      ];
-      modules-center = [
-        "clock"
-      ];
-      modules-right = [
-        "mpris"
-        "idle_inhibitor"
-        "backlight"
-        "pulseaudio"
-        "network"
-        "battery"
-        "tray"
-      ];
+      modules-left = [ "group/left-a" "group/left-b" ];
+      modules-center = [ "group/center-a" "group/center-b" ];
+      modules-right = [ "group/right-a" "group/right-b" ];
 
-      "niri/workspaces" = {
-        format = "{icon}";
-        format-icons = {
-          active = "";
-          default = "";
-        };
+      "group/left-a" = {
+        orientation = "horizontal";
+        modules = [ "clock" "custom/swaync" ];
+      };
+      "group/left-b" = {
+        orientation = "horizontal";
+        modules = [ "niri/workspaces" ];
       };
 
-      "niri/window" = {
-        format = "{}";
-        max-length = 40;
-        rewrite = {
-          "" = "";
-        };
+      "group/center-a" = {
+        orientation = "horizontal";
+        modules = [ "tray" ];
+      };
+      "group/center-b" = {
+        orientation = "horizontal";
+        modules = [ "wlr/taskbar" ];
+      };
+
+      "group/right-a" = {
+        orientation = "horizontal";
+        modules = [ "mpris" "idle_inhibitor" ];
+      };
+      "group/right-b" = {
+        orientation = "horizontal";
+        modules = [ "network" "bluetooth" "battery" "pulseaudio" "backlight" ];
       };
 
       clock = {
         format = "  {:%H:%M}";
         format-alt = "  {:%a %d %b %Y}";
         tooltip-format = "<tt>{calendar}</tt>";
+        on-click = "swaync-client -t -sw";
         calendar = {
           mode = "month";
           weeks-pos = "left";
@@ -70,6 +61,47 @@ in
             today = "<span color='${primary}'><b>{}</b></span>";
           };
         };
+      };
+
+      "custom/swaync" = {
+        tooltip = false;
+        format = "{icon}";
+        format-icons = {
+          notification = "<span foreground='${error}'><sup></sup></span>";
+          none = "";
+          dnd-notification = "<span foreground='${error}'><sup></sup></span>";
+          dnd-none = "";
+          inhibited-notification = "<span foreground='${error}'><sup></sup></span>";
+          inhibited-none = "";
+          dnd-inhibited-notification = "<span foreground='${error}'><sup></sup></span>";
+          dnd-inhibited-none = "";
+        };
+        return-type = "json";
+        exec-if = "which swaync-client";
+        exec = "swaync-client -swb";
+        on-click = "swaync-client -t -sw";
+        on-click-right = "swaync-client -d -sw";
+        escape = true;
+      };
+
+      "niri/workspaces" = {
+        format = "{index}";
+        on-click = "activate";
+      };
+
+      tray = {
+        spacing = 8;
+        icon-size = 18;
+      };
+
+      "wlr/taskbar" = {
+        format = "{icon}";
+        icon-size = 18;
+        tooltip-format = "{title}";
+        on-click = "activate";
+        on-click-middle = "close";
+        on-click-right = "minimize";
+        ignore-list = [ ];
       };
 
       mpris = {
@@ -92,9 +124,25 @@ in
         tooltip-format-deactivated = "Idle inhibitor: off";
       };
 
-      backlight = {
-        format = "  {percent}%";
-        tooltip-format = "Brightness: {percent}%";
+      network = {
+        format-wifi = "  {essid} ({signalStrength}%)";
+        format-ethernet = "  {ifname}";
+        format-disconnected = "  off";
+        tooltip-format-wifi = "{ipaddr}/{cidr}\n{signaldBm}dBm @ {frequency}GHz";
+        tooltip-format-ethernet = "{ipaddr}/{cidr}";
+        max-length = 24;
+        on-click = "nm-connection-editor";
+      };
+
+      bluetooth = {
+        format = "";
+        format-disabled = "";
+        format-off = "";
+        format-connected = "  {num_connections}";
+        tooltip-format = "{controller_alias}\t{controller_address}";
+        tooltip-format-connected = "{controller_alias}\t{controller_address}\n\n{device_enumerate}";
+        tooltip-format-enumerate-connected = "{device_alias}\t{device_address}";
+        on-click = "blueman-manager";
       };
 
       battery = {
@@ -110,30 +158,23 @@ in
         tooltip-format = "{timeTo} ({power:.1f}W)";
       };
 
-      network = {
-        format-wifi = "  {essid} ({signalStrength}%)";
-        format-ethernet = "  {ifname}";
-        format-disconnected = "  off";
-        tooltip-format-wifi = "{ipaddr}/{cidr}\n{signaldBm}dBm @ {frequency}GHz";
-        tooltip-format-ethernet = "{ipaddr}/{cidr}";
-        max-length = 24;
-        on-click = "nm-connection-editor";
-      };
-
       pulseaudio = {
         format = "{icon}  {volume}%";
         format-muted = "  muted";
         format-icons = {
           default = [ "" "" "" ];
         };
-        on-click = "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
+        on-scroll-up = "swayosd-client --output-volume raise";
+        on-scroll-down = "swayosd-client --output-volume lower";
+        on-click = "swayosd-client --output-volume mute-toggle";
         on-click-right = "pavucontrol";
-        scroll-step = 2;
       };
 
-      tray = {
-        spacing = 8;
-        icon-size = 18;
+      backlight = {
+        format = "  {percent}%";
+        tooltip-format = "Brightness: {percent}%";
+        on-scroll-up = "swayosd-client --brightness raise";
+        on-scroll-down = "swayosd-client --brightness lower";
       };
     };
 
@@ -145,15 +186,8 @@ in
       }
 
       window#waybar {
-        background: rgba(21, 21, 21, 0.92);
+        background: transparent;
         color: ${fg};
-        border-radius: 12px;
-        border: 1px solid ${bgSurface};
-      }
-
-      window#waybar.empty #window {
-        padding: 0;
-        margin: 0;
       }
 
       tooltip {
@@ -164,15 +198,47 @@ in
         padding: 4px 8px;
       }
 
-      #workspaces {
-        margin-left: 4px;
+      #left-a,
+      #left-b,
+      #center-a,
+      #center-b,
+      #right-a,
+      #right-b {
+        background: rgba(21, 21, 21, 0.92);
+        border: 1px solid ${bgSurface};
+        border-radius: 12px;
+        padding: 0 6px;
+      }
+
+      #left-a { margin-right: 6px; }
+      #center-a { margin-right: 6px; }
+      #right-a { margin-right: 6px; }
+
+      #center-a.empty,
+      #center-b.empty,
+      #right-a.empty {
+        background: transparent;
+        border-color: transparent;
+        padding: 0;
+        margin: 0;
+      }
+
+      #clock {
+        padding: 0 10px;
+        color: ${fg};
+        font-weight: bold;
+      }
+
+      #custom-swaync {
+        padding: 0 10px 0 4px;
+        color: ${fgDim};
       }
 
       #workspaces button {
-        padding: 0 6px;
+        padding: 0 8px;
         color: ${fgMuted};
         border: none;
-        border-radius: 6px;
+        border-radius: 8px;
         background: transparent;
         margin: 4px 2px;
         transition: all 0.2s ease;
@@ -188,14 +254,32 @@ in
         color: ${fg};
       }
 
-      #window {
-        padding: 0 12px;
-        color: ${fgDim};
+      #tray {
+        padding: 0 8px;
       }
 
-      #clock {
-        color: ${fg};
-        font-weight: bold;
+      #tray > .passive {
+        -gtk-icon-effect: dim;
+      }
+
+      #tray > .needs-attention {
+        -gtk-icon-effect: highlight;
+      }
+
+      #taskbar button {
+        padding: 0 6px;
+        margin: 3px 2px;
+        border-radius: 8px;
+        background: transparent;
+        transition: all 0.2s ease;
+      }
+
+      #taskbar button.active {
+        background: rgba(255, 190, 137, 0.12);
+      }
+
+      #taskbar button:hover {
+        background: ${bgSurface};
       }
 
       #mpris {
@@ -212,30 +296,25 @@ in
         color: ${primary};
       }
 
+      #network,
+      #bluetooth,
+      #battery,
+      #pulseaudio,
       #backlight {
         padding: 0 10px;
-        color: ${amber};
       }
 
-      #battery,
-      #network,
-      #pulseaudio,
-      #tray {
-        padding: 0 10px;
-      }
+      #network { color: ${tide}; }
+      #network.disconnected { color: ${fgMuted}; }
 
-      #battery {
-        color: ${success};
-      }
+      #bluetooth { color: ${tide}; }
+      #bluetooth.disabled,
+      #bluetooth.off { color: ${fgMuted}; }
+      #bluetooth.connected { color: ${primary}; }
 
-      #battery.charging {
-        color: ${success};
-      }
-
-      #battery.warning:not(.charging) {
-        color: ${warning};
-      }
-
+      #battery { color: ${success}; }
+      #battery.charging { color: ${success}; }
+      #battery.warning:not(.charging) { color: ${warning}; }
       #battery.critical:not(.charging) {
         color: ${error};
         animation: blink 1s steps(2) infinite;
@@ -245,33 +324,10 @@ in
         to { color: transparent; }
       }
 
-      #network {
-        color: ${tide};
-      }
+      #pulseaudio { color: ${violet}; }
+      #pulseaudio.muted { color: ${fgMuted}; }
 
-      #network.disconnected {
-        color: ${fgMuted};
-      }
-
-      #pulseaudio {
-        color: ${violet};
-      }
-
-      #pulseaudio.muted {
-        color: ${fgMuted};
-      }
-
-      #tray {
-        margin-right: 4px;
-      }
-
-      #tray > .passive {
-        -gtk-icon-effect: dim;
-      }
-
-      #tray > .needs-attention {
-        -gtk-icon-effect: highlight;
-      }
+      #backlight { color: ${amber}; }
     '';
   };
 }

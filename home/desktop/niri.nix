@@ -151,7 +151,6 @@ in
 
     spawn-at-startup = [
       { command = [ "waybar" ]; }
-      { command = [ "mako" ]; }
       { command = [ "${randomWallpaper}" ]; }
       { command = [ "wl-paste" "--type" "text" "--watch" "cliphist" "store" ]; }
       { command = [ "wl-paste" "--type" "image" "--watch" "cliphist" "store" ]; }
@@ -168,8 +167,8 @@ in
 
       "Mod+V".action = spawn "sh" "-c" "cliphist list | rofi -dmenu -p 'Clipboard' | cliphist decode | wl-copy";
 
-      "Mod+N".action = spawn "makoctl" "dismiss";
-      "Mod+Shift+N".action = spawn "makoctl" "dismiss" "--all";
+      "Mod+N".action = spawn "swaync-client" "-cl";
+      "Mod+Shift+N".action = spawn "swaync-client" "-C";
 
       "Mod+Left".action = focus-column-left;
       "Mod+Right".action = focus-column-right;
