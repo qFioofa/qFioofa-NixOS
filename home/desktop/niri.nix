@@ -1,4 +1,13 @@
-{ config, ... }:
+{ config, pkgs, ... }:
+let
+  randomWallpaper = pkgs.writeShellScript "random-wallpaper" ''
+    dir=${../../wallpaper}
+    wallpaper=$(${pkgs.findutils}/bin/find "$dir" \
+      -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \) \
+      | ${pkgs.coreutils}/bin/shuf -n 1)
+    exec ${pkgs.swaybg}/bin/swaybg -i "$wallpaper" -m fill
+  '';
+in
 {
   programs.niri.settings = {
     environment = {
@@ -135,12 +144,15 @@
 
     prefer-no-csd = true;
     screenshot-path = "~/Pictures/Screenshots/screenshot-%Y-%m-%d-%H-%M-%S.png";
-    xwayland-satellite.enable = true;
+    xwayland-satellite = {
+      enable = true;
+      path = "${pkgs.xwayland-satellite}/bin/xwayland-satellite";
+    };
 
     spawn-at-startup = [
       { command = [ "waybar" ]; }
       { command = [ "mako" ]; }
-      { command = [ "swaybg" "-i" "${../../wallpaper/bg.jpg}" "-m" "fill" ]; }
+      { command = [ "${randomWallpaper}" ]; }
       { command = [ "wl-paste" "--type" "text" "--watch" "cliphist" "store" ]; }
       { command = [ "wl-paste" "--type" "image" "--watch" "cliphist" "store" ]; }
     ];

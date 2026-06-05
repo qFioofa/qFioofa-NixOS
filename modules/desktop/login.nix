@@ -1,9 +1,6 @@
 { pkgs, ... }:
 {
-  services.greetd = {
-    enable = true;
-    settings.default_session.user = "greeter";
-  };
+  services.greetd.enable = true;
 
   programs.regreet = {
     enable = true;
@@ -24,7 +21,7 @@
 
     settings = {
       background = {
-        path = ../../wallpaper/bg.jpg;
+        path = ../../wallpaper/b-102.jpg;
         fit = "Cover";
       };
       GTK.application_prefer_dark_theme = true;
