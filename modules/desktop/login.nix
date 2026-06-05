@@ -2,11 +2,32 @@
 {
   services.greetd = {
     enable = true;
+    settings.default_session.user = "greeter";
+  };
+
+  programs.regreet = {
+    enable = true;
+
+    theme = {
+      name = "Adwaita-dark";
+      package = pkgs.gnome-themes-extra;
+    };
+    cursorTheme = {
+      name = "Adwaita";
+      package = pkgs.adwaita-icon-theme;
+    };
+    font = {
+      name = "JetBrainsMono Nerd Font";
+      package = pkgs.nerd-fonts.jetbrains-mono;
+      size = 12;
+    };
+
     settings = {
-      default_session = {
-        command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --cmd niri-session";
-        user = "greeter";
+      background = {
+        path = ../../wallpaper/bg.jpg;
+        fit = "Cover";
       };
+      GTK.application_prefer_dark_theme = true;
     };
   };
 }

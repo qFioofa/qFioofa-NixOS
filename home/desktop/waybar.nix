@@ -1,6 +1,5 @@
 { pkgs, ... }:
 let
-  # yugen-ash palette
   bg = "#151515";
   bgSurface = "#303030";
   fg = "#D4D4D4";

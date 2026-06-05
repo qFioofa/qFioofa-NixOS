@@ -4,5 +4,8 @@
     telegram-desktop
     vlc
     chromium
+    rocketchat-desktop
+    nemo
+    networkmanagerapplet
   ];
 }

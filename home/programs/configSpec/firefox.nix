@@ -4,7 +4,6 @@
 
   home.sessionVariables.BROWSER = "firefox";
 
-  # Make Firefox the default browser for opening links / HTML files
   xdg.mimeApps = {
     enable = true;
     defaultApplications = {
