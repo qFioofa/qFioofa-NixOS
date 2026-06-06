@@ -5,6 +5,12 @@
 
     layout = [
       {
+        label = "lock";
+        action = "swaylock";
+        text = "Lock";
+        keybind = "l";
+      }
+      {
         label = "logout";
         action = "niri msg action quit --skip-confirmation";
         text = "Logout";
@@ -61,6 +67,9 @@
         outline: none;
       }
 
+      #lock {
+        background-image: url("${pkgs.wlogout}/share/wlogout/icons/lock.png");
+      }
       #logout {
         background-image: url("${pkgs.wlogout}/share/wlogout/icons/logout.png");
       }

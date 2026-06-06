@@ -40,7 +40,7 @@ in
 
     layout = {
       gaps = 12;
-      center-focused-column = "never";
+      center-focused-column = "always";
       always-center-single-column = true;
 
       preset-column-widths = [
@@ -163,7 +163,8 @@ in
       "Mod+E".action = spawn "nemo";
       "Mod+Q".action = close-window;
 
-      "Mod+Shift+Q".action = spawn "wlogout";
+      "Mod+Shift+Q".action = spawn "powermenu";
+      "Mod+Alt+L".action = spawn "swaylock";
 
       "Mod+V".action = spawn "sh" "-c" "cliphist list | rofi -dmenu -p 'Clipboard' | cliphist decode | wl-copy";
 

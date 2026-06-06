@@ -5,7 +5,9 @@
     ./waybar.nix
     ./launcher.nix
     ./notifications.nix
-    ./wlogout.nix
+    ./powermenu.nix
+    ./popups.nix
+    ./lock.nix
     ./services.nix
   ];
 }

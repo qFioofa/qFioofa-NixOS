@@ -9,6 +9,9 @@
 
   security.polkit.enable = true;
 
+  # Allow swaylock to authenticate the user (otherwise the lock can't be unlocked).
+  security.pam.services.swaylock = { };
+
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
   environment.systemPackages = with pkgs; [

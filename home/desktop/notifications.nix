@@ -7,7 +7,7 @@ in
     enable = true;
     settings = {
       positionX = "right";
-      positionY = "top";
+      positionY = "bottom";
       control-center-width = 380;
       control-center-margin-top = 8;
       control-center-margin-bottom = 8;

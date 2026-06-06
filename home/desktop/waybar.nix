@@ -5,6 +5,50 @@ let
     bg bgSurface fg fgDim fgMuted
     primary success warning error
     violet tide amber coral;
+
+  playerctl = "${pkgs.playerctl}/bin/playerctl";
+  jq = "${pkgs.jq}/bin/jq";
+
+  # Placeholder for the taskbar capsule. wlr/taskbar renders nothing when no
+  # windows are open, so this prints a graceful "No apps" marker in that case
+  # and hides itself (empty text) the moment any window exists.
+  noApps = pkgs.writeShellScript "waybar-noapps" ''
+    count=$(niri msg --json windows 2>/dev/null | ${jq} 'length' 2>/dev/null)
+    if [ -z "$count" ] || [ "$count" -eq 0 ]; then
+      printf '{"text":"󰣆  No apps","tooltip":"No windows open","class":"empty"}\n'
+    else
+      printf '{"text":""}\n'
+    fi
+  '';
+
+  # Now-playing indicator. Always prints valid JSON so the capsule renders
+  # something graceful ("Idle") when no player is active.
+  nowPlaying = pkgs.writeShellScript "waybar-nowplaying" ''
+    esc() { printf '%s' "$1" | ${pkgs.gnused}/bin/sed 's/\\/\\\\/g; s/"/\\"/g'; }
+
+    status=$(${playerctl} status 2>/dev/null)
+    if [ -z "$status" ]; then
+      printf '{"text":"󰝛  Idle · no sound","tooltip":"Nothing is playing","class":"empty"}\n'
+      exit 0
+    fi
+
+    title=$(${playerctl} metadata title 2>/dev/null)
+    artist=$(${playerctl} metadata artist 2>/dev/null)
+    [ -z "$title" ] && title="Unknown"
+
+    if [ ''${#title} -gt 28 ]; then
+      title=$(printf '%s' "$title" | ${pkgs.coreutils}/bin/cut -c1-27)…
+    fi
+
+    case "$status" in
+      Playing) icon="󰎆" ; cls="playing" ;;
+      Paused)  icon="󰏤" ; cls="paused"  ;;
+      *)       icon="󰎈" ; cls="stopped" ;;
+    esac
+
+    printf '{"text":"%s  %s","tooltip":"%s","class":"%s"}\n' \
+      "$icon" "$(esc "$title")" "$(esc "$artist")" "$cls"
+  '';
 in
 {
   programs.waybar = {
@@ -18,40 +62,68 @@ in
       margin-left = 8;
       margin-right = 8;
 
-      modules-left = [ "group/left-a" "group/left-b" ];
+      modules-left = [ "group/left-a" "group/left-b" "group/left-c" ];
       modules-center = [ "group/center-a" "group/center-b" ];
       modules-right = [ "group/right-a" "group/right-b" ];
 
       "group/left-a" = {
         orientation = "horizontal";
-        modules = [ "clock" "custom/swaync" ];
+        modules = [ "clock" "niri/language" ];
       };
       "group/left-b" = {
         orientation = "horizontal";
         modules = [ "niri/workspaces" ];
+      };
+      # Media capsule: now-playing block + sound controls live together.
+      "group/left-c" = {
+        orientation = "horizontal";
+        modules = [ "custom/player" "group/audio" ];
+      };
+      # Volume icon in the bar; the slider slides out on hover.
+      "group/audio" = {
+        orientation = "horizontal";
+        drawer = {
+          transition-duration = 300;
+          transition-left-to-right = true;
+          children-class = "drawer-child";
+        };
+        modules = [ "pulseaudio" "pulseaudio/slider" ];
       };
 
       "group/center-a" = {
         orientation = "horizontal";
         modules = [ "tray" ];
       };
+      # Open windows of the current workspace, sitting to the right of the tray.
       "group/center-b" = {
         orientation = "horizontal";
-        modules = [ "wlr/taskbar" ];
+        modules = [ "wlr/taskbar" "custom/apps" ];
       };
 
+      # Hardware controls: brightness drawer + idle inhibitor.
       "group/right-a" = {
         orientation = "horizontal";
-        modules = [ "mpris" "idle_inhibitor" ];
+        modules = [ "group/brightness" "idle_inhibitor" ];
       };
+      # Brightness icon in the bar; the slider slides out on hover.
+      "group/brightness" = {
+        orientation = "horizontal";
+        drawer = {
+          transition-duration = 300;
+          transition-left-to-right = true;
+          children-class = "drawer-child";
+        };
+        modules = [ "backlight" "backlight/slider" ];
+      };
+      # Status + system capsule.
       "group/right-b" = {
         orientation = "horizontal";
-        modules = [ "network" "bluetooth" "battery" "pulseaudio" "backlight" ];
+        modules = [ "network" "bluetooth" "battery" "custom/swaync" "custom/power" ];
       };
 
       clock = {
-        format = "  {:%H:%M}";
-        format-alt = "  {:%a %d %b %Y}";
+        format = "󰥔  {:%H:%M}";
+        format-alt = "󰃭  {:%a %d %b %Y}";
         tooltip-format = "<tt>{calendar}</tt>";
         on-click = "swaync-client -t -sw";
         calendar = {
@@ -67,14 +139,14 @@ in
         tooltip = false;
         format = "{icon}";
         format-icons = {
-          notification = "<span foreground='${error}'><sup></sup></span>";
-          none = "";
-          dnd-notification = "<span foreground='${error}'><sup></sup></span>";
-          dnd-none = "";
-          inhibited-notification = "<span foreground='${error}'><sup></sup></span>";
-          inhibited-none = "";
-          dnd-inhibited-notification = "<span foreground='${error}'><sup></sup></span>";
-          dnd-inhibited-none = "";
+          notification = "<span foreground='${error}'>󰂞</span>";
+          none = "󰂚";
+          dnd-notification = "<span foreground='${error}'>󰂠</span>";
+          dnd-none = "󰂛";
+          inhibited-notification = "<span foreground='${error}'>󰂞</span>";
+          inhibited-none = "󰂚";
+          dnd-inhibited-notification = "<span foreground='${error}'>󰂠</span>";
+          dnd-inhibited-none = "󰂛";
         };
         return-type = "json";
         exec-if = "which swaync-client";
@@ -82,6 +154,40 @@ in
         on-click = "swaync-client -t -sw";
         on-click-right = "swaync-client -d -sw";
         escape = true;
+      };
+
+      "custom/power" = {
+        tooltip = false;
+        format = "󰐥";
+        on-click = "powermenu";
+      };
+
+      # Now-playing block — click toggles play/pause, scroll changes track.
+      "custom/player" = {
+        return-type = "json";
+        exec = "${nowPlaying}";
+        interval = 2;
+        format = "{}";
+        escape = true;
+        on-click = "${playerctl} play-pause";
+        on-click-right = "${playerctl} next";
+        on-scroll-up = "${playerctl} next";
+        on-scroll-down = "${playerctl} previous";
+      };
+
+      # "No apps" marker that fills the taskbar capsule when no window is open.
+      "custom/apps" = {
+        return-type = "json";
+        exec = "${noApps}";
+        interval = 2;
+        format = "{}";
+        escape = true;
+      };
+
+      "niri/language" = {
+        format = "󰌌  {short}";
+        tooltip-format = "{long}";
+        on-click = "layout-popup";
       };
 
       "niri/workspaces" = {
@@ -104,45 +210,37 @@ in
         ignore-list = [ ];
       };
 
-      mpris = {
-        format = "{player_icon}  {title}";
-        format-paused = "{player_icon}  <i>{title}</i>";
-        player-icons = {
-          default = "";
-          firefox = "";
-        };
-        title-len = 25;
-      };
-
       idle_inhibitor = {
         format = "{icon}";
         format-icons = {
-          activated = "";
-          deactivated = "";
+          activated = "󰅶";
+          deactivated = "󰾪";
         };
         tooltip-format-activated = "Idle inhibitor: on";
         tooltip-format-deactivated = "Idle inhibitor: off";
       };
 
       network = {
-        format-wifi = "  {essid} ({signalStrength}%)";
-        format-ethernet = "  {ifname}";
-        format-disconnected = "  off";
+        format-wifi = "󰤨  {essid} ({signalStrength}%)";
+        format-ethernet = "󰈀  {ifname}";
+        format-disconnected = "󰤭  off";
         tooltip-format-wifi = "{ipaddr}/{cidr}\n{signaldBm}dBm @ {frequency}GHz";
         tooltip-format-ethernet = "{ipaddr}/{cidr}";
         max-length = 24;
-        on-click = "nm-connection-editor";
+        on-click = "wifi-popup";
+        on-click-right = "nm-connection-editor";
       };
 
       bluetooth = {
-        format = "";
-        format-disabled = "";
-        format-off = "";
-        format-connected = "  {num_connections}";
+        format = "󰂯";
+        format-disabled = "󰂲";
+        format-off = "󰂲";
+        format-connected = "󰂱  {num_connections}";
         tooltip-format = "{controller_alias}\t{controller_address}";
         tooltip-format-connected = "{controller_alias}\t{controller_address}\n\n{device_enumerate}";
         tooltip-format-enumerate-connected = "{device_alias}\t{device_address}";
-        on-click = "blueman-manager";
+        on-click = "bt-popup";
+        on-click-right = "blueman-manager";
       };
 
       battery = {
@@ -151,18 +249,18 @@ in
           critical = 15;
         };
         format = "{icon}  {capacity}%";
-        format-charging = "  {capacity}%";
-        format-plugged = "  {capacity}%";
-        format-full = "  Full";
-        format-icons = [ "" "" "" "" "" ];
+        format-charging = "󰂄  {capacity}%";
+        format-plugged = "󰂄  {capacity}%";
+        format-full = "󰁹  Full";
+        format-icons = [ "󰁻" "󰁽" "󰁿" "󰂁" "󰁹" ];
         tooltip-format = "{timeTo} ({power:.1f}W)";
       };
 
       pulseaudio = {
         format = "{icon}  {volume}%";
-        format-muted = "  muted";
+        format-muted = "󰝟  muted";
         format-icons = {
-          default = [ "" "" "" ];
+          default = [ "󰕿" "󰖀" "󰕾" ];
         };
         on-scroll-up = "swayosd-client --output-volume raise";
         on-scroll-down = "swayosd-client --output-volume lower";
@@ -170,11 +268,23 @@ in
         on-click-right = "pavucontrol";
       };
 
+      "pulseaudio/slider" = {
+        min = 0;
+        max = 100;
+        orientation = "horizontal";
+      };
+
       backlight = {
-        format = "  {percent}%";
+        format = "󰃠  {percent}%";
         tooltip-format = "Brightness: {percent}%";
         on-scroll-up = "swayosd-client --brightness raise";
         on-scroll-down = "swayosd-client --brightness lower";
+      };
+
+      "backlight/slider" = {
+        min = 0;
+        max = 100;
+        orientation = "horizontal";
       };
     };
 
@@ -200,6 +310,7 @@ in
 
       #left-a,
       #left-b,
+      #left-c,
       #center-a,
       #center-b,
       #right-a,
@@ -211,12 +322,14 @@ in
       }
 
       #left-a { margin-right: 6px; }
+      #left-b { margin-right: 6px; }
+      #left-c { margin-right: 6px; }
       #center-a { margin-right: 6px; }
       #right-a { margin-right: 6px; }
 
+      /* Collapse the tray / taskbar capsules when they are empty. */
       #center-a.empty,
-      #center-b.empty,
-      #right-a.empty {
+      #center-b.empty {
         background: transparent;
         border-color: transparent;
         padding: 0;
@@ -229,9 +342,41 @@ in
         font-weight: bold;
       }
 
+      #language {
+        padding: 0 10px;
+        margin: 6px 0;
+        border-left: 1px solid ${bgSurface};
+        color: ${tide};
+        font-weight: bold;
+        transition: color 0.2s ease;
+      }
+
+      #language:hover {
+        color: ${fg};
+      }
+
       #custom-swaync {
-        padding: 0 10px 0 4px;
+        padding: 0 10px;
+        margin: 6px 0;
+        border-left: 1px solid ${bgSurface};
         color: ${fgDim};
+        transition: color 0.2s ease;
+      }
+
+      #custom-swaync:hover {
+        color: ${fg};
+      }
+
+      #custom-power {
+        padding: 0 12px 0 10px;
+        margin: 6px 0;
+        border-left: 1px solid ${bgSurface};
+        color: ${fgDim};
+        transition: color 0.2s ease;
+      }
+
+      #custom-power:hover {
+        color: ${error};
       }
 
       #workspaces button {
@@ -266,6 +411,15 @@ in
         -gtk-icon-effect: highlight;
       }
 
+      #taskbar {
+        padding: 0 4px;
+      }
+
+      #custom-apps {
+        padding: 0 10px;
+        color: ${fgMuted};
+      }
+
       #taskbar button {
         padding: 0 6px;
         margin: 3px 2px;
@@ -282,13 +436,22 @@ in
         background: ${bgSurface};
       }
 
-      #mpris {
+      /* Now-playing block; divider separates it from the sound controls. */
+      #custom-player {
         padding: 0 10px;
+        margin: 6px 0;
+        border-right: 1px solid ${bgSurface};
         color: ${coral};
       }
 
+      #custom-player.empty {
+        color: ${fgMuted};
+      }
+
       #idle_inhibitor {
-        padding: 0 8px;
+        padding: 0 10px;
+        margin: 6px 0;
+        border-left: 1px solid ${bgSurface};
         color: ${fgMuted};
       }
 
@@ -302,6 +465,13 @@ in
       #pulseaudio,
       #backlight {
         padding: 0 10px;
+      }
+
+      /* Dividers between the status/system modules. */
+      #bluetooth,
+      #battery {
+        margin: 6px 0;
+        border-left: 1px solid ${bgSurface};
       }
 
       #network { color: ${tide}; }
@@ -328,6 +498,40 @@ in
       #pulseaudio.muted { color: ${fgMuted}; }
 
       #backlight { color: ${amber}; }
+
+      /* Sliders for audio and brightness. */
+      #pulseaudio-slider,
+      #backlight-slider {
+        min-width: 84px;
+        padding: 0 12px;
+      }
+
+      #pulseaudio-slider trough,
+      #backlight-slider trough {
+        min-width: 84px;
+        min-height: 6px;
+        border-radius: 999px;
+        background-color: ${bgSurface};
+      }
+
+      #pulseaudio-slider highlight {
+        background-color: ${violet};
+        border-radius: 999px;
+      }
+
+      #backlight-slider highlight {
+        background-color: ${amber};
+        border-radius: 999px;
+      }
+
+      #pulseaudio-slider slider,
+      #backlight-slider slider {
+        background-color: ${fg};
+        border-radius: 999px;
+        min-width: 12px;
+        min-height: 12px;
+        margin: -4px 0;
+      }
     '';
   };
 }
