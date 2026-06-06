@@ -14,4 +14,9 @@
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.intel.updateMicrocode = lib.mkDefault true;
+
+  # This host is the Huawei Matebook — enable the vendor quirk fixes (audio
+  # Dummy Output / dead mic, IPU6 camera). Defined in modules/system/huawei.nix
+  # and only ever switched on here, so other hosts are unaffected.
+  hardware.huawei.matebook.enable = true;
 }

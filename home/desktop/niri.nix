@@ -1,5 +1,8 @@
 { config, pkgs, ... }:
 let
+  theme = import ../../theme.nix;
+  inherit (theme) bg bgSurface primary coral;
+
   randomWallpaper = pkgs.writeShellScript "random-wallpaper" ''
     dir=${../../wallpaper}
     wallpaper=$(${pkgs.findutils}/bin/find "$dir" \
@@ -30,13 +33,23 @@ in
     input.touchpad = {
       tap = true;
       natural-scroll = true;
+      dwt = true;                       # disable while typing
+      accel-profile = "adaptive";
+      scroll-method = "two-finger";
+      click-method = "clickfinger";     # 2-finger = right click, 3-finger = middle
+      tap-button-map = "left-right-middle";
+      disabled-on-external-mouse = true;
     };
+
+    # Touchpad swipes (3/4-finger workspace + overview gestures) are built in;
+    # this enables the top-left hot corner to open the overview.
+    gestures.hot-corners.enable = true;
 
     outputs."eDP-1".scale = 1.0;
 
     hotkey-overlay.skip-at-startup = true;
 
-    overview.backdrop-color = "#151515";
+    overview.backdrop-color = bg;
 
     layout = {
       gaps = 12;
@@ -50,18 +63,21 @@ in
       ];
       default-column-width.proportion = 1.0 / 2.0;
 
-      focus-ring.enable = false;
-
-      border = {
+      # The focus ring is drawn *outside* the window (it overlaps neighbours
+      # rather than shrinking the window like a border does), so the outline
+      # sits around the app instead of eating into it. Kept thin.
+      focus-ring = {
         enable = true;
-        width = 2;
+        width = 1;
         active.gradient = {
-          from = "#FFBE89";
-          to = "#FF9E8B";
+          from = primary;
+          to = coral;
           angle = 45;
         };
-        inactive.color = "#303030";
+        inactive.color = bgSurface;
       };
+
+      border.enable = false;
 
       shadow = {
         enable = true;
@@ -110,11 +126,16 @@ in
 
     window-rules = [
       {
-        opacity = 0.95;
-      }
-      {
-        matches = [{ is-active = true; }];
-        opacity = 1.0;
+        # Small rounded corners for every window. clip-to-geometry rounds the
+        # window surface itself (and cuts client-side shadows), so the focus
+        # ring and shadow follow the same radius.
+        geometry-corner-radius = {
+          top-left = 8.0;
+          top-right = 8.0;
+          bottom-right = 8.0;
+          bottom-left = 8.0;
+        };
+        clip-to-geometry = true;
       }
       {
         matches = [
@@ -152,6 +173,9 @@ in
     spawn-at-startup = [
       { command = [ "waybar" ]; }
       { command = [ "${randomWallpaper}" ]; }
+      # Polkit authentication agent (swayosd/swaync/nm-applet already run as
+      # systemd user services; this is the one missing piece for GUI auth).
+      { command = [ "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1" ]; }
       { command = [ "wl-paste" "--type" "text" "--watch" "cliphist" "store" ]; }
       { command = [ "wl-paste" "--type" "image" "--watch" "cliphist" "store" ]; }
     ];
@@ -170,6 +194,16 @@ in
 
       "Mod+N".action = spawn "swaync-client" "-cl";
       "Mod+Shift+N".action = spawn "swaync-client" "-C";
+
+      # Wi-Fi / Bluetooth rofi popups (Q19).
+      "Mod+Shift+W".action = spawn "wifi-popup";
+      "Mod+Shift+B".action = spawn "bt-popup";
+
+      # Toggle the waybar (SIGUSR1 hides/shows it), the overview, and a themed
+      # keybinding cheat-sheet.
+      "Mod+B".action = spawn "${pkgs.procps}/bin/pkill" "--signal" "SIGUSR1" "waybar";
+      "Mod+O".action = toggle-overview;
+      "Mod+Slash".action = spawn "help-manual";
 
       "Mod+Left".action = focus-column-left;
       "Mod+Right".action = focus-column-right;
@@ -256,4 +290,8 @@ in
       "Mod+Shift+P".action = power-off-monitors;
     };
   };
+
+  # Guarantee the screenshot target directory exists (screenshot-path above
+  # writes here and won't create missing parents).
+  home.file."Pictures/Screenshots/.keep".text = "";
 }
