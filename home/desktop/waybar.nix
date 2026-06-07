@@ -7,19 +7,37 @@ let
     violet tide amber coral;
 
   playerctl = "${pkgs.playerctl}/bin/playerctl";
-  jq = "${pkgs.jq}/bin/jq";
 
-  # Placeholder for the taskbar capsule. wlr/taskbar renders nothing when no
-  # windows are open, so this prints a graceful "No apps" marker in that case
-  # and hides itself (empty text) the moment any window exists.
-  noApps = pkgs.writeShellScript "waybar-noapps" ''
-    count=$(niri msg --json windows 2>/dev/null | ${jq} 'length' 2>/dev/null)
-    if [ -z "$count" ] || [ "$count" -eq 0 ]; then
-      printf '{"text":"󰣆  No apps","tooltip":"No windows open","class":"empty"}\n'
-    else
-      printf '{"text":""}\n'
-    fi
-  '';
+  # niri-taskbar: a native (CFFI/GTK) Waybar module for niri that renders the
+  # real application icons from each window's desktop entry — something a text
+  # custom module cannot do. Pinned to the release matching the installed niri
+  # (v25.08); the IPC protocol must line up with the running compositor.
+  niriTaskbar = pkgs.rustPlatform.buildRustPackage rec {
+    pname = "niri-taskbar";
+    version = "0.3.0+niri.25.08";
+    src = pkgs.fetchFromGitHub {
+      owner = "LawnGnome";
+      repo = "niri-taskbar";
+      rev = "v0.3.0+niri.25.08";
+      hash = "sha256-Gbzh4OTkvtP9F/bfDUyA14NH2DMDdr3i6oFoFwinEAg=";
+    };
+    cargoHash = "sha256-Ql9iqbbS3DY7o5/PR96c2t4VXKoS1kjZ9k3SfhNdbzE=";
+    nativeBuildInputs = [ pkgs.pkg-config ];
+    buildInputs = [ pkgs.gtk3 ];
+
+    # Upstream shows every window on the monitor (all workspaces). Restrict the
+    # snapshot to windows on the *active* workspace of each output, so the bar
+    # only lists apps on the current workspace. The snapshot is already sorted by
+    # workspace index → column position, so within the workspace icons stay in
+    # on-screen order and reshuffle when a window is moved left/right.
+    postPatch = ''
+      substituteInPlace src/niri/state.rs \
+        --replace-fail \
+          'return Some(WindowWorkspace { window, workspace });' \
+          'if workspace.is_active { return Some(WindowWorkspace { window, workspace }); }'
+    '';
+  };
+  niriTaskbarLib = "${niriTaskbar}/lib/libniri_taskbar.so";
 
   # Now-playing indicator. Always prints valid JSON so the capsule renders
   # something graceful ("Idle") when no player is active.
@@ -94,10 +112,11 @@ in
         orientation = "horizontal";
         modules = [ "tray" ];
       };
-      # Open windows of the current workspace, sitting to the right of the tray.
+      # Taskbar of open windows, sitting to the right of the tray. niri-taskbar
+      # renders real app icons (per output, ordered by workspace then open time).
       "group/center-b" = {
         orientation = "horizontal";
-        modules = [ "wlr/taskbar" "custom/apps" ];
+        modules = [ "cffi/niri-taskbar" ];
       };
 
       # Hardware controls: brightness drawer + idle inhibitor.
@@ -175,13 +194,9 @@ in
         on-scroll-down = "${playerctl} previous";
       };
 
-      # "No apps" marker that fills the taskbar capsule when no window is open.
-      "custom/apps" = {
-        return-type = "json";
-        exec = "${noApps}";
-        interval = 2;
-        format = "{}";
-        escape = true;
+      # Native niri taskbar (CFFI module) — real app icons, click to focus.
+      "cffi/niri-taskbar" = {
+        module_path = niriTaskbarLib;
       };
 
       "niri/language" = {
@@ -198,16 +213,6 @@ in
       tray = {
         spacing = 8;
         icon-size = 18;
-      };
-
-      "wlr/taskbar" = {
-        format = "{icon}";
-        icon-size = 18;
-        tooltip-format = "{title}";
-        on-click = "activate";
-        on-click-middle = "close";
-        on-click-right = "minimize";
-        ignore-list = [ ];
       };
 
       idle_inhibitor = {
@@ -411,16 +416,12 @@ in
         -gtk-icon-effect: highlight;
       }
 
-      #taskbar {
+      /* niri-taskbar: real app icons. .focused marks the active window. */
+      .niri-taskbar {
         padding: 0 4px;
       }
 
-      #custom-apps {
-        padding: 0 10px;
-        color: ${fgMuted};
-      }
-
-      #taskbar button {
+      .niri-taskbar button {
         padding: 0 6px;
         margin: 3px 2px;
         border-radius: 8px;
@@ -428,12 +429,16 @@ in
         transition: all 0.2s ease;
       }
 
-      #taskbar button.active {
+      .niri-taskbar button.focused {
         background: rgba(255, 190, 137, 0.12);
       }
 
-      #taskbar button:hover {
+      .niri-taskbar button:hover {
         background: ${bgSurface};
+      }
+
+      .niri-taskbar button.urgent {
+        background: rgba(245, 122, 122, 0.18);
       }
 
       /* Now-playing block; divider separates it from the sound controls. */

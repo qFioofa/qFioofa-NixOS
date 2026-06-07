@@ -8,6 +8,7 @@
     nemo
     networkmanagerapplet
 
+    discord
     zoom-us
     gimp
   ];

@@ -7,5 +7,8 @@
     cargo
     gcc
     go
+    zig
+    elixir
+    erlang
   ];
 }
