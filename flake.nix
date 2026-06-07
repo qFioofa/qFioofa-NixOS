@@ -16,6 +16,18 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # DPI-bypass daemon (bol-van/zapret) packaged as a NixOS module.
+    zapret = {
+      url = "github:aca/zapret-flake.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # Local MTProto proxy that accelerates Telegram (Flowseal/tg-ws-proxy).
+    tg-ws-proxy = {
+      url = "github:pialtor/tg-ws-proxy-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     ghostty-config.url = "github:qFioofa/qFioofa-Ghostty";
     zsh-config.url = "github:qFioofa/qFioofa-zsh";
     wezterm-config.url = "github:qFioofa/qFioofa-wezterm";
@@ -28,6 +40,7 @@
       specialArgs = { inherit inputs; };
       modules = [
         niri.nixosModules.niri
+        inputs.zapret.nixosModules.zapret
         home-manager.nixosModules.home-manager
         ./hosts/default/default.nix
       ];
@@ -38,6 +51,7 @@
       specialArgs = { inherit inputs; };
       modules = [
         niri.nixosModules.niri
+        inputs.zapret.nixosModules.zapret
         home-manager.nixosModules.home-manager
         ./hosts/qFioofa/default.nix
       ];

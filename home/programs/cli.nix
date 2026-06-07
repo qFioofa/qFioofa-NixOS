@@ -11,13 +11,18 @@
     fzf
     eza
     zoxide
-    btop
     dust
     jq
+
+    btop
     unzip
     zip
     p7zip
+
     playerctl
     asciiquarium
+
+    tree
+    file
   ];
 }
