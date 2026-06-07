@@ -18,5 +18,6 @@
     zip
     p7zip
     playerctl
+    asciiquarium
   ];
 }
