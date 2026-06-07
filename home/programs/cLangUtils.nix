@@ -5,5 +5,6 @@
 	  gnumake
 	  cmakeCurses
     valgrind
+    check
   ];
 }

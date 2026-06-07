@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 let
   theme = import ../../theme.nix;
-  inherit (theme) bg bgSurface primary coral;
+  inherit (theme) bg bgSurface fgMuted;
 
   randomWallpaper = pkgs.writeShellScript "random-wallpaper" ''
     dir=${../../wallpaper}
@@ -36,7 +36,10 @@ in
       dwt = true;                       # disable while typing
       accel-profile = "adaptive";
       scroll-method = "two-finger";
-      click-method = "clickfinger";     # 2-finger = right click, 3-finger = middle
+      # button-areas: physically pressing the bottom-left = left click and
+      # bottom-right = right click (the traditional clickpad behaviour). tap is
+      # still on, so tapping with 1/2/3 fingers also maps to left/right/middle.
+      click-method = "button-areas";
       tap-button-map = "left-right-middle";
       disabled-on-external-mouse = true;
     };
@@ -63,17 +66,12 @@ in
       ];
       default-column-width.proportion = 1.0 / 2.0;
 
-      # The focus ring is drawn *outside* the window (it overlaps neighbours
-      # rather than shrinking the window like a border does), so the outline
-      # sits around the app instead of eating into it. Kept thin.
+      # Thin focus ring in a muted neutral grey so it marks the focused window
+      # without standing out. Drawn outside the window, so it doesn't eat space.
       focus-ring = {
         enable = true;
         width = 1;
-        active.gradient = {
-          from = primary;
-          to = coral;
-          angle = 45;
-        };
+        active.color = fgMuted;
         inactive.color = bgSurface;
       };
 
