@@ -7,5 +7,8 @@
     rocketchat-desktop
     nemo
     networkmanagerapplet
+
+    zoom-us
+    gimp
   ];
 }
