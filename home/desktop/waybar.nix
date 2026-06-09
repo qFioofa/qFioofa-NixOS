@@ -155,7 +155,7 @@ in
       };
 
       "custom/swaync" = {
-        tooltip = false;
+        tooltip = true;
         format = "{icon}";
         format-icons = {
           notification = "<span foreground='${error}'>󰂞</span>";

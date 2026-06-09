@@ -1,7 +1,7 @@
 { pkgs, ... }:
 let
   theme = import ../../theme.nix;
-  inherit (theme) bg bgSurface fg fgDim fgMuted primary;
+  inherit (theme) bg bgSurface fg fgDim fgMuted primary radius radiusInner border;
 
   rofi = "${pkgs.rofi}/bin/rofi";
   nmcli = "${pkgs.networkmanager}/bin/nmcli";
@@ -25,9 +25,9 @@ let
     }
     window {
       width:         320px;
-      border:        2px;
+      border:        ${border};
       border-color:  @accent;
-      border-radius: 12px;
+      border-radius: ${radius};
       background-color: @bg;
       location: north east;
       anchor:   north east;
@@ -42,7 +42,7 @@ let
     inputbar {
       spacing: 8px;
       padding: 8px 12px;
-      border-radius: 8px;
+      border-radius: ${radiusInner};
       background-color: @bg-surface;
       children: [ prompt, entry ];
     }
@@ -61,7 +61,7 @@ let
     element {
       padding: 8px 12px;
       spacing: 8px;
-      border-radius: 8px;
+      border-radius: ${radiusInner};
       background-color: transparent;
       text-color: @fg-dim;
     }
@@ -86,9 +86,9 @@ let
     }
     window {
       width:         220px;
-      border:        2px;
+      border:        ${border};
       border-color:  @accent;
-      border-radius: 12px;
+      border-radius: ${radius};
       background-color: @bg;
       location: north west;
       anchor:   north west;
@@ -110,7 +110,7 @@ let
     element {
       padding: 8px 12px;
       spacing: 8px;
-      border-radius: 8px;
+      border-radius: ${radiusInner};
       background-color: transparent;
       text-color: @fg-dim;
     }

@@ -12,4 +12,11 @@
   tide = "#79a0aa";
   amber = "#D4A76A";
   coral = "#FF9E8B";
+
+  # Shared design tokens so popups, the control center, and floating
+  # notifications read as one system (see popups.nix / notifications.nix).
+  font = "JetBrainsMono Nerd Font";
+  radius = "12px"; # outer surfaces (windows, control center)
+  radiusInner = "8px"; # inner elements (inputs, buttons, list rows)
+  border = "2px"; # accent border width
 }
