@@ -33,6 +33,7 @@ in
 
       # --- Point 3: behaviour / functionality ---
       keyboard-shortcuts = true; # arrow-key navigation in the control center
+      notification-grouping = true; # group per app — renders the app-icon + name header
       hide-on-clear = true;
       hide-on-action = true; # close the popup once its (default) action fires
       script-fail-notify = true;
@@ -106,6 +107,11 @@ in
       .notification-content {
         color: ${fg};
         padding: 6px;
+      }
+
+      /* Small gap between the app profile (icon) and the message content. */
+      .notification-content .text-box {
+        margin-left: 8px;
       }
 
       .summary {
@@ -185,15 +191,24 @@ in
         color: ${bg};
       }
 
-      /* Grouping: collapse repeated notifications from one app (point 3). */
+      /* App "profile" header on top of each app's notifications:
+         the system app icon + the app name, with a small gap before the
+         message content below. */
       .notification-group-headers {
-        color: ${fg};
-        font-weight: bold;
-        padding: 4px 8px;
+        padding: 2px 6px;
+        margin-bottom: 6px;
       }
 
       .notification-group-icon {
-        color: ${fgDim};
+        color: ${fg};
+        -gtk-icon-size: 22px;
+        margin-right: 8px;
+      }
+
+      .notification-group-header {
+        /* The app-name label. */
+        color: ${primary};
+        font-weight: bold;
       }
 
       .notification-group-collapse-button,
