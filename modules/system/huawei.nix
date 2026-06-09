@@ -3,10 +3,6 @@ let
   cfg = config.hardware.huawei.matebook;
 in
 {
-  # Hardware quirk fixes for Huawei Matebook laptops. Everything here is gated
-  # behind `hardware.huawei.matebook.enable`, which is only switched on by the
-  # Huawei host (hosts/qFioofa) — so on any non-Huawei machine the whole module
-  # evaluates to nothing and none of these kernel/firmware tweaks are applied.
   options.hardware.huawei.matebook = {
     enable = lib.mkEnableOption
       "Huawei Matebook hardware quirk fixes (Dummy Output audio, dead internal mic, IPU6 camera)";
@@ -25,19 +21,22 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # --- Audio: "Dummy Output" + dead internal microphone ---------------------
-    # Huawei Matebooks ship a broken SOF/DSP ACPI description: the firmware
-    # advertises a DSP audio path that doesn't actually drive the Realtek codec,
-    # so PipeWire/ALSA enumerate only a "Dummy Output" and the internal mic never
-    # shows up. Forcing the legacy HDA driver (dsp_driver=1) instead of SOF, and
-    # disabling digital-mic autodetect (dmic_detect=0), restores both speakers
-    # and the internal microphone.
+    # --- Audio: dead internal microphone (DMIC) -------------------------------
+    # This Matebook (Tiger Lake, Conexant SN6140 codec, NHLT/DMIC in ACPI) keeps
+    # its built-in microphone on the Intel DSP as a digital mic (DMIC). The
+    # legacy HDA driver (snd-hda-intel) cannot expose a DMIC, so under dsp_driver=1
+    # only the external headset-jack mic enumerates and the internal mic is dead.
+    # Forcing the SOF driver (dsp_driver=3) brings up the DSP audio path, which
+    # exposes both the codec (speakers/headphones) and the internal DMIC.
     #
-    # NOTE: a minority of Matebook models are the inverse — they *need* SOF. If
-    # audio is still dead after this, try dsp_driver=3 (force SOF) here instead.
+    # dmic_detect is a legacy-HDA-only option and must NOT be set here: it would
+    # only suppress mic detection, and it is irrelevant once SOF owns the device.
+    #
+    # NOTE: a minority of Matebook models are the inverse — forcing SOF leaves
+    # them with a silent "Dummy Output". If audio is dead after this, fall back to
+    # dsp_driver=1 (force legacy HDA) plus `options snd-hda-intel dmic_detect=0`.
     boot.extraModprobeConfig = ''
-      options snd-intel-dspcfg dsp_driver=1
-      options snd-hda-intel dmic_detect=0
+      options snd-intel-dspcfg dsp_driver=3
     '';
 
     # SOF firmware is still required for the models that keep the mic on the DSP.
