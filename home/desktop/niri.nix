@@ -87,34 +87,62 @@ in
     };
 
     animations = {
+      # Global pacing. Keep at real-time; bump temporarily for screen captures.
+      slowdown = 1.0;
+
+      # Sliding between workspaces: a graceful, critically-damped glide. Softer
+      # stiffness than before so the motion reads as deliberate, not instant.
       workspace-switch.kind.spring = {
         damping-ratio = 1.0;
-        stiffness = 1000;
+        stiffness = 750;
         epsilon = 0.0001;
       };
-      window-open.kind.easing = {
-        duration-ms = 150;
-        curve = "ease-out-expo";
+
+      # Windows pop in with a subtle overshoot (under-damped spring) for a bit
+      # of life, and snap out quickly on close so dismissals feel immediate.
+      window-open.kind.spring = {
+        damping-ratio = 0.82;
+        stiffness = 700;
+        epsilon = 0.0001;
       };
       window-close.kind.easing = {
-        duration-ms = 150;
+        duration-ms = 130;
         curve = "ease-out-quad";
       };
+
+      # View scroll and column/window reflow share one springy character so the
+      # whole layout moves as a single cohesive surface. window-movement is a
+      # touch livelier (lower damping) to make reordering feel tactile.
       horizontal-view-movement.kind.spring = {
         damping-ratio = 1.0;
-        stiffness = 800;
+        stiffness = 750;
         epsilon = 0.0001;
       };
       window-movement.kind.spring = {
-        damping-ratio = 1.0;
-        stiffness = 800;
+        damping-ratio = 0.88;
+        stiffness = 750;
         epsilon = 0.0001;
       };
       window-resize.kind.spring = {
         damping-ratio = 1.0;
+        stiffness = 850;
+        epsilon = 0.0001;
+      };
+
+      # Overview zoom — a soft, slightly lively spring matching window-open.
+      overview-open-close.kind.spring = {
+        damping-ratio = 0.9;
         stiffness = 800;
         epsilon = 0.0001;
       };
+
+      # Screenshot UI scales/fades in with a quick, clean ease.
+      screenshot-ui-open.kind.easing = {
+        duration-ms = 200;
+        curve = "ease-out-quad";
+      };
+
+      # The config-reload toast keeps its playful bounce.
       config-notification-open-close.kind.spring = {
         damping-ratio = 0.6;
         stiffness = 1000;
@@ -182,10 +210,16 @@ in
 
       "Mod+Return".action = spawn "ghostty";
       "Mod+D".action = spawn "rofi" "-show" "drun";
+      # Rofi-style fuzzy switcher over all open windows (Alt+Tab equivalent).
+      "Mod+Tab".action = spawn "window-switcher";
       "Mod+E".action = spawn "nemo";
       "Mod+Q".action = close-window;
 
       "Mod+Shift+Q".action = spawn "powermenu";
+      # Fullscreen wlogout overlay (toggle: press again to dismiss). Spawned
+      # by absolute profile path since niri's spawn PATH does not reliably
+      # include the home-manager profile (see the lock bind below).
+      "Mod+Escape".action = spawn "${config.home.profileDirectory}/bin/wlogout-toggle";
       # Win+Alt+L. Spawned by absolute path: `lock` is a home-manager package,
       # and niri's spawn PATH does not reliably include the HM profile
       # (unlike the old `swaylock`, which was a system binary). Referencing the

@@ -7,6 +7,7 @@
     ./notifications.nix
     ./powermenu.nix
     ./popups.nix
+    ./switcher.nix
     ./help.nix
     ./lock.nix
     ./services.nix

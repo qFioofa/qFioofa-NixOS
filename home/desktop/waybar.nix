@@ -353,7 +353,7 @@ in
         border-left: 1px solid ${bgSurface};
         color: ${tide};
         font-weight: bold;
-        transition: color 0.2s ease;
+        transition: color 180ms cubic-bezier(0.33, 1, 0.68, 1);
       }
 
       #language:hover {
@@ -365,7 +365,7 @@ in
         margin: 6px 0;
         border-left: 1px solid ${bgSurface};
         color: ${fgDim};
-        transition: color 0.2s ease;
+        transition: color 180ms cubic-bezier(0.33, 1, 0.68, 1);
       }
 
       #custom-swaync:hover {
@@ -377,7 +377,7 @@ in
         margin: 6px 0;
         border-left: 1px solid ${bgSurface};
         color: ${fgDim};
-        transition: color 0.2s ease;
+        transition: color 180ms cubic-bezier(0.33, 1, 0.68, 1);
       }
 
       #custom-power:hover {
@@ -391,7 +391,7 @@ in
         border-radius: 8px;
         background: transparent;
         margin: 4px 2px;
-        transition: all 0.2s ease;
+        transition: all 180ms cubic-bezier(0.33, 1, 0.68, 1);
       }
 
       #workspaces button.active {
@@ -426,7 +426,7 @@ in
         margin: 3px 2px;
         border-radius: 8px;
         background: transparent;
-        transition: all 0.2s ease;
+        transition: all 180ms cubic-bezier(0.33, 1, 0.68, 1);
       }
 
       .niri-taskbar button.focused {
@@ -468,8 +468,13 @@ in
       #bluetooth,
       #battery,
       #pulseaudio,
-      #backlight {
+      #backlight,
+      #idle_inhibitor,
+      #custom-player {
         padding: 0 10px;
+        /* Fade between state colours (connect/disconnect, charge, mute…)
+           instead of snapping. */
+        transition: color 250ms cubic-bezier(0.33, 1, 0.68, 1);
       }
 
       /* Dividers between the status/system modules. */
@@ -492,11 +497,16 @@ in
       #battery.warning:not(.charging) { color: ${warning}; }
       #battery.critical:not(.charging) {
         color: ${error};
-        animation: blink 1s steps(2) infinite;
+        animation: pulse 1.6s ease-in-out infinite;
       }
 
-      @keyframes blink {
-        to { color: transparent; }
+      /* A soft breathing pulse — calmer and more legible than a hard blink.
+         GTK's CSS parser rejects combined keyframe selectors (0%, 100%), so
+         each stop is written out separately. */
+      @keyframes pulse {
+        0%   { color: ${error}; }
+        50%  { color: rgba(245, 122, 122, 0.35); }
+        100% { color: ${error}; }
       }
 
       #pulseaudio { color: ${violet}; }

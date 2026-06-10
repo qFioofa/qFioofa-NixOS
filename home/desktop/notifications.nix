@@ -19,8 +19,8 @@ in
       control-center-margin-bottom = 8;
       control-center-margin-right = 8;
       notification-window-width = 360;
-      timeout = 5;
-      timeout-low = 3;
+      timeout = 10;
+      timeout-low = 6;
       timeout-critical = 0;
       fit-to-screen = false;
 
@@ -143,6 +143,7 @@ in
       /* Click-to-open affordance: the whole card is the default action. */
       .notification-default-action {
         border-radius: 10px;
+        transition: background 180ms cubic-bezier(0.33, 1, 0.68, 1);
       }
 
       .notification-default-action:hover {
@@ -157,6 +158,7 @@ in
         border-radius: ${radiusInner};
         margin: 4px;
         padding: 4px 10px;
+        transition: all 180ms cubic-bezier(0.33, 1, 0.68, 1);
       }
 
       .notification-action:hover {
@@ -241,6 +243,7 @@ in
         background: transparent;
         color: ${fgMuted};
         border-radius: ${radiusInner};
+        transition: all 180ms cubic-bezier(0.33, 1, 0.68, 1);
       }
 
       .close-button:hover {
@@ -294,6 +297,7 @@ in
         padding: 8px;
         margin: 4px;
         font-size: 16px;
+        transition: all 180ms cubic-bezier(0.33, 1, 0.68, 1);
       }
 
       .widget-buttons-grid button:hover,
