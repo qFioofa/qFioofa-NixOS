@@ -68,7 +68,7 @@ let
           -no-custom -format s)
 
     case "$chosen" in
-      *Lock*)     swaylock ;;
+      *Lock*)     lock ;;
       *Logout*)   niri msg action quit --skip-confirmation ;;
       *Suspend*)  systemctl suspend ;;
       *Reboot*)   systemctl reboot ;;

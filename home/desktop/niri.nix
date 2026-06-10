@@ -186,7 +186,11 @@ in
       "Mod+Q".action = close-window;
 
       "Mod+Shift+Q".action = spawn "powermenu";
-      "Mod+Alt+L".action = spawn "swaylock";
+      # Win+Alt+L. Spawned by absolute path: `lock` is a home-manager package,
+      # and niri's spawn PATH does not reliably include the HM profile
+      # (unlike the old `swaylock`, which was a system binary). Referencing the
+      # profile directory makes the bind fire regardless of PATH.
+      "Mod+Alt+L".action = spawn "${config.home.profileDirectory}/bin/lock";
 
       "Mod+V".action = spawn "sh" "-c" "cliphist list | rofi -dmenu -p 'Clipboard' | cliphist decode | wl-copy";
 

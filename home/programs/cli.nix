@@ -24,5 +24,9 @@
 
     tree
     file
+    xdg-utils
+
+    docker
+    cppcheck
   ];
 }

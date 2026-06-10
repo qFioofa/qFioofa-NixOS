@@ -1,15 +1,17 @@
 { pkgs, ... }:
 {
   home.packages = with pkgs; [
-    telegram-desktop
     vlc
-    chromium
-    rocketchat-desktop
     nemo
+    chromium
+    telegram-desktop
+    rocketchat-desktop
     networkmanagerapplet
 
+    gimp
     discord
     zoom-us
-    gimp
+
+    virtualbox
   ];
 }

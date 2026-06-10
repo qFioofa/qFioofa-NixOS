@@ -57,7 +57,7 @@ in
           { label = "󰖩"; command = "wifi-popup"; }
           { label = "󰂯"; command = "bt-popup"; }
           { label = "󰄀"; command = "niri msg action screenshot"; }
-          { label = "󰍁"; command = "swaylock"; }
+          { label = "󰍁"; command = "lock"; }
           { label = "󰐥"; command = "powermenu"; }
         ];
       };
