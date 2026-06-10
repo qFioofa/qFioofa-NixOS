@@ -30,11 +30,54 @@ let
     # only lists apps on the current workspace. The snapshot is already sorted by
     # workspace index → column position, so within the workspace icons stay in
     # on-screen order and reshuffle when a window is moved left/right.
+    #
+    # The catch: upstream only refreshes its Workspace list (and thus the
+    # is_active flags) on the bulk WorkspacesChanged event. Switching workspaces
+    # in niri instead emits WorkspaceActivated, which upstream drops in its
+    # `_ => {}` arm because it never needed is_active. Our filter does, so we also
+    # handle WorkspaceActivated and update is_active/is_focused ourselves —
+    # otherwise the bar freezes on whichever workspace was active at startup.
     postPatch = ''
       substituteInPlace src/niri/state.rs \
         --replace-fail \
           'return Some(WindowWorkspace { window, workspace });' \
           'if workspace.is_active { return Some(WindowWorkspace { window, workspace }); }'
+
+      substituteInPlace src/niri/state.rs \
+        --replace-fail \
+          '            _ => {}' \
+          '            Event::WorkspaceActivated { id, focused } => {
+                if let Some(Inner::Ready(state)) = &mut self.0 {
+                    state.activate_workspace(id, focused);
+                }
+            }
+            _ => {}'
+
+      substituteInPlace src/niri/state.rs \
+        --replace-fail \
+          '    fn set_focus(&mut self, id: Option<u64>) {' \
+          '    fn activate_workspace(&mut self, id: u64, focused: bool) {
+        // A workspace becomes active on its own output, deactivating whichever
+        // workspace was previously active there; focus is global across outputs.
+        let output = self.workspaces.get(&id).and_then(|ws| ws.output.clone());
+        for ws in self.workspaces.values_mut() {
+            if ws.id == id {
+                ws.is_active = true;
+                if focused {
+                    ws.is_focused = true;
+                }
+            } else {
+                if ws.output == output {
+                    ws.is_active = false;
+                }
+                if focused {
+                    ws.is_focused = false;
+                }
+            }
+        }
+    }
+
+    fn set_focus(&mut self, id: Option<u64>) {'
     '';
   };
   niriTaskbarLib = "${niriTaskbar}/lib/libniri_taskbar.so";
