@@ -1,11 +1,90 @@
 { config, lib, pkgs, ... }:
 let
   cfg = config.hardware.huawei.matebook;
+
+  # --- SOF topology filename compat shim (the real "no sound" fix) -------------
+  # On Tiger Lake the ESSX8336 machine driver builds the topology filename by
+  # appending only the DMIC count, e.g. `sof-tgl-es8336-dmic2ch.tplg` — it does
+  # NOT append an `-sspN` suffix (that suffix is gated by a per-platform
+  # tplg_quirk_mask that TGL does not set). But current sof-firmware only ships
+  # the SSP-suffixed variants (`...-dmic2ch-ssp0.tplg.zst`, `-ssp1`, `-ssp2`),
+  # so the exact name the kernel asks for is missing and SOF aborts with
+  #   SOF firmware and/or topology file not found ... err: -2
+  # leaving a silent "Dummy Output". The ES8336 on these boards sits on SSP0, so
+  # we just expose the SSP0 topology under the bare name the kernel requests.
+  #
+  # pkgs.sof-firmware ships uncompressed .tplg files; NixOS compresses the main
+  # package into the merged tree itself. We keep this shim uncompressed
+  # (compressFirmware=false) and add only the new bare names as symlinks to the
+  # real SSP0 topology — the kernel asks for the uncompressed name first, so a
+  # plain .tplg is found directly with no collision against the -sspN variants.
+  #
+  # NOTE (qFioofa / BoDE-WXX9, 2026-06): on this unit the SOF path is a dead end,
+  # so the shim is moot there. The ES8336 sits on LPSS I2C controller #2
+  # (\_SB_.PC00.I2C2.ESSX = PCI 00:15.2), and that PCI function is
+  # *function-disabled in firmware* — it returns nothing even to direct CF8/CFC
+  # port I/O (`lspci -A intel-conf1 -s 00:15.2`), so it is gone, not merely
+  # hidden, and no kernel/modprobe/PMC poke can bring it back (the disable is
+  # latched at reset). Under SOF the es8336 machine driver therefore waits
+  # forever for its codec (`deferred probe pending`) and no card registers — the
+  # silent "Dummy Output". The working audio on this board is the OTHER codec, a
+  # Conexant CX11880 analog HDA codec on the normal HDA link, reached via
+  # audioDriver = "hda" (see hosts/qFioofa/hardware.nix). Re-enabling the ES8336
+  # path for the internal DMIC would need I2C2 enabled in firmware (Huawei BIOS
+  # update / FSP UPD SerialIoI2cEnable[2]).
+  sofEs8336TglTplgCompat = pkgs.runCommand "sof-tgl-es8336-tplg-compat"
+    { passthru.compressFirmware = false; } ''
+      d="$out/lib/firmware/intel/sof-tplg"
+      src="${pkgs.sof-firmware}/lib/firmware/intel/sof-tplg"
+      mkdir -p "$d"
+      ln -s "$src/sof-tgl-es8336-dmic2ch-ssp0.tplg" "$d/sof-tgl-es8336-dmic2ch.tplg"
+      ln -s "$src/sof-tgl-es8336-dmic4ch-ssp0.tplg" "$d/sof-tgl-es8336-dmic4ch.tplg"
+    '';
 in
 {
   options.hardware.huawei.matebook = {
     enable = lib.mkEnableOption
       "Huawei Matebook hardware quirk fixes (Dummy Output audio, dead internal mic, IPU6 camera)";
+
+    audioDriver = lib.mkOption {
+      type = lib.types.enum [ "sof" "hda" ];
+      default = "hda";
+      description = ''
+        Which Intel DSP driver to force for the built-in audio:
+          - "sof"  Force the SOF DSP (dsp_driver=3). Needed by Matebooks that
+                   keep the internal mic on the DSP as a digital mic (DMIC),
+                   which legacy HDA cannot expose.
+          - "hda"  Force legacy HDA (dsp_driver=1) plus snd-hda-intel
+                   dmic_detect=0. Only for models whose speakers/mic sit on a
+                   plain HDA codec (e.g. Conexant/Realtek) and that genuinely
+                   misbehave under SOF. Do NOT use it on the I2C-codec models
+                   (ES8336 etc.): HDA cannot drive an I2C codec, so it produces
+                   no working card — those need "sof".
+      '';
+    };
+
+    es8336Quirk = lib.mkOption {
+      type = lib.types.nullOr lib.types.int;
+      default = 384; # 0x180 = HEADPHONE_GPIO | HEADSET_MIC1, SSP codec 0
+      description = ''
+        Quirk bitmask passed to the SOF ES8336 machine driver
+        (`options snd_soc_sof_es8336 quirk=…`), only used when
+        audioDriver = "sof". It encodes how the ES8336 is wired on this board:
+
+          bits 0-3  SSP codec port number          (0 for Matebook D → SSP0)
+          BIT(4) 16 SPEAKERS_EN_GPIO1
+          BIT(5) 32 ENABLE_DMIC
+          BIT(6) 64 JD_INVERTED  (jack-detect polarity)
+          BIT(7) 128 HEADPHONE_GPIO (separate GPIO mutes speakers on plug-in)
+          BIT(8) 256 HEADSET_MIC1   (internal/headset mic on MIC1)
+
+        The default 384 (0x180) matches the in-tree Huawei Matebook D ES8336
+        entry (and the BOD-WXX9 quirk): SSP0, separate headphone GPIO, headset
+        mic on MIC1. Speakers already work from just the topology shim; this
+        adds correct headphone-jack switching. Set to null to let the kernel /
+        NHLT decide with no override.
+      '';
+    };
 
     ipu6Platform = lib.mkOption {
       type = lib.types.enum [ "ipu6" "ipu6ep" "ipu6epmtl" "none" ];
@@ -21,26 +100,39 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # --- Audio: dead internal microphone (DMIC) -------------------------------
-    # This Matebook (Tiger Lake, Conexant SN6140 codec, NHLT/DMIC in ACPI) keeps
-    # its built-in microphone on the Intel DSP as a digital mic (DMIC). The
-    # legacy HDA driver (snd-hda-intel) cannot expose a DMIC, so under dsp_driver=1
-    # only the external headset-jack mic enumerates and the internal mic is dead.
-    # Forcing the SOF driver (dsp_driver=3) brings up the DSP audio path, which
-    # exposes both the codec (speakers/headphones) and the internal DMIC.
+    # --- Audio: Dummy Output / dead internal microphone -----------------------
+    # The internal mic on these Matebooks sits on the Intel DSP, and which DSP
+    # driver works is model-dependent (see the audioDriver option):
     #
-    # dmic_detect is a legacy-HDA-only option and must NOT be set here: it would
-    # only suppress mic detection, and it is irrelevant once SOF owns the device.
+    #   "sof"  Force the SOF DSP (dsp_driver=3). Exposes both the codec
+    #          (speakers/headphones) and the internal digital mic (DMIC) on
+    #          models that keep the mic on the DSP. dmic_detect must NOT be set
+    #          here — it is a legacy-HDA-only option, irrelevant once SOF owns
+    #          the device.
     #
-    # NOTE: a minority of Matebook models are the inverse — forcing SOF leaves
-    # them with a silent "Dummy Output". If audio is dead after this, fall back to
-    # dsp_driver=1 (force legacy HDA) plus `options snd-hda-intel dmic_detect=0`.
-    boot.extraModprobeConfig = ''
-      options snd-intel-dspcfg dsp_driver=3
-    '';
+    #   "hda"  Force legacy HDA (dsp_driver=1) for models whose audio is a plain
+    #          HDA codec (Conexant/Realtek) and that misbehave under SOF. Legacy
+    #          HDA gives speakers and the analog/headset mic; dmic_detect=0 stops
+    #          a broken DMIC probe from poisoning the card. NOTE: this does NOT
+    #          work for I2C-codec models (ES8336): HDA can't drive an I2C codec,
+    #          so it registers no usable card and you get the silent "Dummy
+    #          Output" — use "sof" there instead.
+    boot.extraModprobeConfig =
+      if cfg.audioDriver == "sof" then ''
+        options snd-intel-dspcfg dsp_driver=3
+      '' + lib.optionalString (cfg.es8336Quirk != null) ''
+        options snd_soc_sof_es8336 quirk=${toString cfg.es8336Quirk}
+      '' else ''
+        options snd-intel-dspcfg dsp_driver=1
+        options snd-hda-intel dmic_detect=0
+      '';
 
-    # SOF firmware is still required for the models that keep the mic on the DSP.
-    hardware.firmware = [ pkgs.sof-firmware ];
+    # SOF firmware is only used by the DSP path, but it is small and harmless to
+    # ship unconditionally, so the audioDriver toggle stays self-contained. The
+    # compat shim supplies the bare-named TGL ES8336 topology the kernel asks for
+    # (see sofEs8336TglTplgCompat above) and is only needed under SOF.
+    hardware.firmware = [ pkgs.sof-firmware ]
+      ++ lib.optional (cfg.audioDriver == "sof") sofEs8336TglTplgCompat;
 
     # --- Camera: Intel IPU6 MIPI webcam (no /dev/video*, black image) ---------
     # Recent Matebooks (X Pro, 14s, D16 2024…) use an Intel IPU6 MIPI sensor
