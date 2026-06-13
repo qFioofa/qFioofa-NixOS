@@ -1,7 +1,10 @@
 { pkgs, ... }:
 let
   theme = import ../../theme.nix;
-  inherit (theme) bg bgSurface fg fgDim fgMuted primary;
+  inherit (theme)
+    bg bgSurface fg fgDim fgMuted
+    primary success warning
+    violet tide amber coral;
 
   # A centered, two-column keybinding cheat-sheet. Visually nicer than niri's
   # built-in hotkey overlay: themed, rounded, with accent section headers and
@@ -63,23 +66,30 @@ let
   '';
 
   helpManual = pkgs.writeShellScriptBin "help-manual" ''
-    # head <title> — accent section header
-    head() { printf '<span color="${primary}" weight="bold" size="large">%s</span>\n' "$1"; }
-    # row <keys> <description> — accent key column + dimmed description
+    # The key column is tinted with the current section's accent so each block
+    # reads as a group; SEC carries that colour from head() to its rows.
+    SEC="${primary}"
+    # head <icon+title> <color> — coloured section header; also sets SEC.
+    head() {
+      SEC="$2"
+      printf '<span color="%s" weight="bold" size="large">%s</span>\n' "$2" "$1"
+    }
+    # row <keys> <description> — section-accent key column + dimmed description.
     row() {
-      printf '<span color="${fg}" weight="bold">%-26s</span><span color="${fgDim}">%s</span>\n' "$1" "$2"
+      printf '<span color="%s" weight="bold">%-26s</span><span color="${fgDim}">%s</span>\n' "$SEC" "$1" "$2"
     }
 
     {
-      head "󰣆  Applications"
+      head "󰣆   Applications" "${primary}"
       row "Mod + Return"            "Terminal (ghostty)"
       row "Mod + D"                 "App launcher (rofi)"
       row "Mod + E"                 "File manager (nemo)"
       row "Mod + V"                 "Clipboard history"
       row "Mod + Shift+W"           "Wi-Fi menu"
       row "Mod + Shift+B"           "Bluetooth menu"
+      row "Mod + Shift+C"           "Calendar & date tools"
 
-      head "  Windows"
+      head "󰖯   Windows" "${tide}"
       row "Mod + Q"                 "Close window"
       row "Mod + H / J / K / L"     "Focus left / down / up / right"
       row "Mod + Shift + H J K L"   "Move window in direction"
@@ -90,14 +100,14 @@ let
       row "Mod + [ / ]"             "Consume / expel window from column"
       row "Mod + - / ="             "Shrink / grow column width"
 
-      head "  Workspaces & Monitors"
+      head "󰍹   Workspaces & Monitors" "${violet}"
       row "Mod + 1..9"              "Focus workspace"
       row "Mod + Shift + 1..9"      "Move window to workspace"
       row "Mod + Page Up/Down"      "Focus workspace up / down"
       row "Mod + Ctrl + Arrows"     "Focus monitor in direction"
       row "Mod + O"                 "Toggle overview"
 
-      head "  Desktop"
+      head "󰇄   Desktop" "${amber}"
       row "Mod + B"                 "Toggle waybar"
       row "Mod + N / Shift+N"       "Notifications close / center"
       row "Mod + Alt + L"           "Lock screen"

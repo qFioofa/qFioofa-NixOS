@@ -187,13 +187,31 @@ in
         format = "󰥔  {:%H:%M}";
         format-alt = "󰃭  {:%a %d %b %Y}";
         tooltip-format = "<tt>{calendar}</tt>";
-        on-click = "swaync-client -t -sw";
+        # Left-click opens the rofi calendar + date-tools app (the notification
+        # center stays on the bell icon). The tooltip calendar below is kept as
+        # a quick at-a-glance peek.
+        on-click = "calendar";
         calendar = {
           mode = "month";
+          # In year mode, lay the 12 months out 3 per row.
+          mode-mon-col = 3;
           weeks-pos = "left";
+          # Number of months to step per scroll tick (paired with the
+          # shift_up/shift_down actions below).
+          on-scroll = 1;
           format = {
             today = "<span color='${primary}'><b>{}</b></span>";
           };
+        };
+        # Hover the clock to see the calendar, then:
+        #   scroll up/down  → page through previous / next months
+        #   right-click     → toggle between month and full-year view
+        #   middle-click    → jump back to the current month
+        actions = {
+          on-click-right = "mode";
+          on-click-middle = "shift_reset";
+          on-scroll-up = "shift_up";
+          on-scroll-down = "shift_down";
         };
       };
 

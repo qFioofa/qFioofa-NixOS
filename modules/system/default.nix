@@ -13,5 +13,6 @@
     ./huawei.nix
     ./users.nix
     ./docker.nix
+    ./db.nix
   ];
 }

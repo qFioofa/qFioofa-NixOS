@@ -54,7 +54,7 @@ let
     }
     element {
       padding: 8px 12px;
-      spacing: 8px;
+      spacing: 10px;
       border-radius: ${radiusInner};
       background-color: transparent;
       text-color: @fg-dim;
@@ -63,6 +63,7 @@ let
       background-color: @bg-surface;
       text-color: @accent;
     }
+    element-icon { size: 1.5em; vertical-align: 0.5; }
     element-text { text-color: inherit; vertical-align: 0.5; }
   '';
 
@@ -77,10 +78,17 @@ let
     ids=$(printf '%s' "$data" | ${jq} -r '.[].id')
     [ -z "$ids" ] && exit 0
 
+    # Emit one rofi row per window as "app · title", tagged with the app_id as
+    # its icon name (rofi resolves it against the GTK icon theme via -show-icons).
+    # jq can't emit raw NUL/US bytes, so the row metadata is assembled by printf:
+    #   <display>\0icon\x1f<icon-name>
     chosen=$(printf '%s' "$data" \
-      | ${jq} -r '.[] | "\(.app_id // "?")  ·  \(.title // "")"' \
+      | ${jq} -r '.[] | "\(.app_id // "?")\t\(.title // "")"' \
+      | while IFS="$(printf '\t')" read -r app title; do
+          printf '%s  ·  %s\0icon\037%s\n' "$app" "$title" "$app"
+        done \
       | ${rofi} -dmenu -i -p "Windows" -theme ${switcherTheme} \
-          -no-custom -format i)
+          -show-icons -no-custom -format i)
     [ -z "$chosen" ] && exit 0
 
     id=$(printf '%s' "$ids" | ${sed} -n "$((chosen + 1))p")

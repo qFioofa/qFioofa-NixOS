@@ -1,7 +1,10 @@
 { pkgs, ... }:
 let
   theme = import ../../theme.nix;
-  inherit (theme) bg bgSurface fg fgDim fgMuted primary error;
+  inherit (theme)
+    bg bgSurface fg fgDim fgMuted
+    primary warning error
+    violet tide amber;
 
   # A compact, centered rofi power menu — a small popup instead of the
   # fullscreen wlogout overlay. Each row is "<icon>  <label>".
@@ -57,13 +60,17 @@ let
   '';
 
   powermenu = pkgs.writeShellScriptBin "powermenu" ''
-    chosen=$(printf '%s\n' \
-      "󰍁  Lock" \
-      "󰍃  Logout" \
-      "󰒲  Suspend" \
-      "󰜉  Reboot" \
-      "󰐥  Shutdown" \
-      | ${pkgs.rofi}/bin/rofi -dmenu -i -p "Power" \
+    # item COLOR ICON LABEL — accent-coloured icon per action so the menu isn't
+    # one flat colour (Shutdown/Reboot lean on the warning/danger hues).
+    item() { printf '<span color="%s" weight="bold">%s</span>   %s\n' "$1" "$2" "$3"; }
+
+    chosen=$( { \
+      item "${tide}"    "󰍁" "Lock"; \
+      item "${amber}"   "󰍃" "Logout"; \
+      item "${violet}"  "󰒲" "Suspend"; \
+      item "${warning}" "󰜉" "Reboot"; \
+      item "${error}"   "󰐥" "Shutdown"; \
+      } | ${pkgs.rofi}/bin/rofi -dmenu -i -markup-rows -p "Power" \
           -theme ${menuTheme} \
           -no-custom -format s)
 

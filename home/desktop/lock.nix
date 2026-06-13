@@ -28,7 +28,6 @@ let
   playerctl = "${pkgs.playerctl}/bin/playerctl";
   swayncClient = "${pkgs.swaynotificationcenter}/bin/swaync-client";
   dbusMonitor = "${pkgs.dbus}/bin/dbus-monitor";
-  brightnessctl = "${pkgs.brightnessctl}/bin/brightnessctl";
 
   # ── Why this is not just swaylock ────────────────────────────────────────
   # A Wayland locker draws *exclusive* lock surfaces (ext-session-lock-v1) and
@@ -419,9 +418,10 @@ in
 
   # Idle management. hypridle uses ext-idle-notify-v1, which niri implements,
   # and respects idle inhibitors (e.g. the waybar toggle, video playback).
-  # NOTE: idle does *not* auto-lock — it just dims the backlight (and later
-  # turns the screen off). We still lock before the machine sleeps and honour
-  # explicit lock requests (loginctl lock-session); manual `lock` is unaffected.
+  # The display is intentionally never powered off (or dimmed to black) on
+  # idle — instead the session locks after a while, so the panel stays lit
+  # showing the lock screen rather than going dark. We still lock before the
+  # machine sleeps; manual `lock` and loginctl lock-session are unaffected.
   services.hypridle = {
     enable = true;
     settings = {
@@ -432,14 +432,8 @@ in
       };
       listener = [
         {
-          timeout = 300; # 5 min → dim backlight to 0% (brightnessctl -s saves
-          on-timeout = "${brightnessctl} -s set 0%"; # the level, -r restores it)
-          on-resume = "${brightnessctl} -r";
-        }
-        {
-          timeout = 330; # 5.5 min → screen off
-          on-timeout = "niri msg action power-off-monitors";
-          on-resume = "niri msg action power-on-monitors";
+          timeout = 600; # 10 min idle → lock the session (screen stays on).
+          on-timeout = "${lockBin}/bin/lock";
         }
       ];
     };

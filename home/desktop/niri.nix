@@ -31,18 +31,26 @@ in
       options = "ctrl:nocaps,grp:lalt_lshift_toggle";
     };
     input.touchpad = {
+      # tap-to-click on: 1-finger tap = left, 2-finger = right, 3-finger =
+      # middle. tap-button-map keeps that mapping explicit. (Previously tap was
+      # off to suppress accidental 3-finger middle-click pastes in apps like
+      # Figma — the tradeoff is back on now that single-touch click is wanted.)
       tap = true;
+      tap-button-map = "left-right-middle";
       natural-scroll = true;
       dwt = true;                       # disable while typing
       accel-profile = "adaptive";
       scroll-method = "two-finger";
       # button-areas: physically pressing the bottom-left = left click and
-      # bottom-right = right click (the traditional clickpad behaviour). tap is
-      # still on, so tapping with 1/2/3 fingers also maps to left/right/middle.
+      # bottom-right = right click (the traditional clickpad behaviour). There
+      # is no physical middle button, so no touchpad gesture middle-clicks now.
       click-method = "button-areas";
-      tap-button-map = "left-right-middle";
-      disabled-on-external-mouse = true;
+      # Keep the touchpad live even with an external mouse plugged in.
+      disabled-on-external-mouse = false;
     };
+    # Traditional mouse-wheel scrolling: wheel down scrolls content down, wheel
+    # up scrolls up. (The touchpad keeps natural-scroll independently above.)
+    input.mouse.natural-scroll = false;
 
     # Touchpad swipes (3/4-finger workspace + overview gestures) are built in;
     # this enables the top-left hot corner to open the overview.
@@ -210,8 +218,8 @@ in
 
       "Mod+Return".action = spawn "ghostty";
       "Mod+D".action = spawn "rofi" "-show" "drun";
-      # Rofi-style fuzzy switcher over all open windows (Alt+Tab equivalent).
-      "Mod+Tab".action = spawn "window-switcher";
+      # Rofi-style fuzzy switcher over all open windows (classic Alt+Tab).
+      "Alt+Tab".action = spawn "window-switcher";
       "Mod+E".action = spawn "nemo";
       "Mod+Q".action = close-window;
 
@@ -234,6 +242,9 @@ in
       # Wi-Fi / Bluetooth rofi popups (Q19).
       "Mod+Shift+W".action = spawn "wifi-popup";
       "Mod+Shift+B".action = spawn "bt-popup";
+
+      # Rofi calendar + date-tools app (also opened by clicking the clock).
+      "Mod+Shift+C".action = spawn "calendar";
 
       # Toggle the waybar (SIGUSR1 hides/shows it), the overview, and a themed
       # keybinding cheat-sheet.
