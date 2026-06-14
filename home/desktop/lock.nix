@@ -281,7 +281,7 @@ let
         if [ "$st" = "Charging" ] || { [ "$cap" -ge 50 ] 2>/dev/null; }; then col=32
         elif [ "$cap" -ge 20 ] 2>/dev/null; then col=93
         else col=31; fi
-        printf '  \033[%dm%s  %s%%\033[0m\033[90m%s\033[0m\n' "$col" "$icon" "$cap" "$extra"
+        printf '\033[%dm%s  %s%%\033[0m\033[90m%s\033[0m\n' "$col" "$icon" "$cap" "$extra"
         break
       done
 
@@ -294,7 +294,7 @@ let
           [ -n "$artist" ] && np="$artist — $title" || np="$title"
           [ ''${#np} -gt 28 ] && np="''${np:0:27}…"
           # Magenta player glyph, title in plain foreground.
-          printf '  \033[35m%s\033[0m  \033[37m%s\033[0m\n' "$g" "$np"
+          printf '\033[35m%s\033[0m  \033[37m%s\033[0m\n' "$g" "$np"
         fi
       fi
      } | ${centerTop}
@@ -334,11 +334,11 @@ let
       cpup=0; [ "$dt" -gt 0 ] && cpup=$(( (dt - di) * 100 / dt ))
       if   [ "$cpup" -ge 80 ]; then cc=31; elif [ "$cpup" -ge 40 ]; then cc=93; else cc=32; fi
       temp=$(cpu_temp); ts=""; [ -n "$temp" ] && ts=$(printf '  \033[90m%s°C\033[0m' "$temp")
-      printf '  \033[36m󰻠\033[0m  %s \033[90m%s%%\033[0m%s\n' "$(${bar} "$cpup" 7 "$cc")" "$cpup" "$ts"
+      printf '\033[36m󰻠\033[0m  %s \033[90m%s%%\033[0m%s\n' "$(${bar} "$cpup" 7 "$cc")" "$cpup" "$ts"
 
       # 1/5/15-minute load average; the 1-min figure stands out, the rest muted.
       read -r l1 l5 l15 _ < /proc/loadavg
-      printf '  \033[34m󰓅\033[0m  \033[37m%s\033[0m \033[90m%s %s\033[0m\n' "$l1" "$l5" "$l15"
+      printf '\033[34m󰓅\033[0m  \033[37m%s\033[0m \033[90m%s %s\033[0m\n' "$l1" "$l5" "$l15"
 
       # Memory: used / total in GiB with a violet bar.
       mt=$(${awk} '/^MemTotal:/{print $2}' /proc/meminfo)
@@ -347,7 +347,7 @@ let
         usedp=$(( (mt - ma) * 100 / mt ))
         ug=$(${awk} -v t="$mt" -v a="$ma" 'BEGIN{printf "%.1f",(t-a)/1048576}')
         tg=$(${awk} -v t="$mt" 'BEGIN{printf "%.0f",t/1048576}')
-        printf '  \033[35m󰍛\033[0m  %s \033[90m%sG/%sG\033[0m\n' "$(${bar} "$usedp" 7 35)" "$ug" "$tg"
+        printf '\033[35m󰍛\033[0m  %s \033[90m%sG/%sG\033[0m\n' "$(${bar} "$usedp" 7 35)" "$ug" "$tg"
       fi
 
       # Root filesystem usage with a primary bar + free space.
@@ -355,14 +355,14 @@ let
       if [ -n "$dline" ]; then
         dp=$(printf '%s' "$dline" | ${awk} '{gsub(/%/,"",$1);print $1+0}')
         dav=$(printf '%s' "$dline" | ${awk} '{print $2}')
-        printf '  \033[33m󰋊\033[0m  %s \033[90m%s своб\033[0m\n' "$(${bar} "$dp" 7 33)" "$dav"
+        printf '\033[33m󰋊\033[0m  %s \033[90m%s своб\033[0m\n' "$(${bar} "$dp" 7 33)" "$dav"
       fi
 
       # Uptime from /proc/uptime (seconds).
       up=$(${cat} /proc/uptime); up=''${up%%.*}
       d=$(( up / 86400 )); hh=$(( up % 86400 / 3600 )); mm=$(( up % 3600 / 60 ))
       u=""; [ "$d" -gt 0 ] && u="''${d}д "
-      printf '  \033[32m󰅐\033[0m  \033[37m%s%dч %dм\033[0m\n' "$u" "$hh" "$mm"
+      printf '\033[32m󰅐\033[0m  \033[37m%s%dч %dм\033[0m\n' "$u" "$hh" "$mm"
      } | ${centerTop}
      ${sleep} 5
     done
@@ -378,13 +378,13 @@ let
       if [ -n "$v" ]; then
         vp=$(printf '%s' "$v" | ${awk} '{print int($2*100+0.5)}'); : "''${vp:=0}"
         if printf '%s' "$v" | ${grep} -q MUTED; then
-          printf '  \033[90m󰝟\033[0m  %s \033[90m%s%%\033[0m\n' "$(${bar} "$vp" 7 90)" "$vp"
+          printf '\033[90m󰝟\033[0m  %s \033[90m%s%%\033[0m\n' "$(${bar} "$vp" 7 90)" "$vp"
         else
-          printf '  \033[36m󰕾\033[0m  %s \033[90m%s%%\033[0m\n' "$(${bar} "$vp" 7 36)" "$vp"
+          printf '\033[36m󰕾\033[0m  %s \033[90m%s%%\033[0m\n' "$(${bar} "$vp" 7 36)" "$vp"
         fi
       fi
       bp=$(${brightnessctl} -m 2>/dev/null | ${awk} -F, '{gsub(/%/,"",$4);print $4+0}')
-      [ -n "$bp" ] && printf '  \033[93m󰃟\033[0m  %s \033[90m%s%%\033[0m\n' "$(${bar} "$bp" 7 93)" "$bp"
+      [ -n "$bp" ] && printf '\033[93m󰃟\033[0m  %s \033[90m%s%%\033[0m\n' "$(${bar} "$bp" 7 93)" "$bp"
      } | ${centerTop}
      ${sleep} 5
     done
@@ -405,18 +405,18 @@ let
         elif [ "$sig" -ge 25 ]; then g='▂▄   '; c=93
         else                         g='▂    '; c=31; fi
         [ ''${#ssid} -gt 16 ] && ssid="''${ssid:0:15}…"
-        printf '  \033[34m󰖩\033[0m  \033[37m%s\033[0m  \033[%dm%s\033[0m\n' "$ssid" "$c" "$g"
+        printf '\033[34m󰖩\033[0m  \033[37m%s\033[0m  \033[%dm%s\033[0m\n' "$ssid" "$c" "$g"
       else
-        printf '  \033[90m󰖪  нет сети\033[0m\n'
+        printf '\033[90m󰖪  нет сети\033[0m\n'
       fi
       ipaddr=$(${ip} route get 1.1.1.1 2>/dev/null \
         | ${awk} '{for(i=1;i<=NF;i++) if($i=="src"){print $(i+1);exit}}')
-      [ -n "$ipaddr" ] && printf '  \033[36m󰩟\033[0m  \033[90m%s\033[0m\n' "$ipaddr"
+      [ -n "$ipaddr" ] && printf '\033[36m󰩟\033[0m  \033[90m%s\033[0m\n' "$ipaddr"
       # VPN / tunnel: show the interface name (green shield) only when a tunnel
       # link is actually up, so it never reports a connection that isn't there.
       vpnif=$(${ip} -o link show up 2>/dev/null \
         | ${awk} -F': ' '$2 ~ /^(tun|wg|amnezia|proton|nordlynx)/{print $2; exit}')
-      [ -n "$vpnif" ] && printf '  \033[32m󰦝\033[0m  \033[32mVPN\033[0m \033[90m%s\033[0m\n' "$vpnif"
+      [ -n "$vpnif" ] && printf '\033[32m󰦝\033[0m  \033[32mVPN\033[0m \033[90m%s\033[0m\n' "$vpnif"
      } | ${centerTop}
      ${sleep} 10
     done
@@ -526,7 +526,7 @@ let
   # echo (that is physically impossible here). Instead the pam_exec hook (see
   # modules/desktop/niri.nix) appends "<epoch> <len>" to the state file below on
   # every password *submit*, and we render, in the lock's own console style:
-  #   • at rest        →  a quiet "❯" prompt (the field is awaiting input)
+  #   • at rest        →  a quiet "❯ Введите пароль" prompt (awaiting input)
   #   • on submit      →  "●●●●  Проверка…"  (length-only mask + verifying)
   #   • ~1s later      →  "✗ Неверно · попытка N"
   # The "wrong" inference is sound: a correct password tears the lock surface
@@ -538,7 +538,7 @@ let
     render() {
       w=$(${tmux} display -p '#{pane_width}' 2>/dev/null); : "''${w:=0}"
       case "$state" in
-        rest)  line=$'\033[90m❯\033[0m' ;;
+        rest)  line=$'\033[90m❯ Введите пароль\033[0m' ;;
         check) m=$(${awk} -v n="$masklen" 'BEGIN{s="";for(i=0;i<n;i++)s=s"●";print s}')
                line=$'\033[33m'"$m  Проверка…"$'\033[0m' ;;
         wrong) line=$'\033[31m'"✗ Неверно · попытка $attempt"$'\033[0m' ;;
