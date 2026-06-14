@@ -1,4 +1,26 @@
 { pkgs, ... }:
+let
+  # Console password feedback for the lock screen (see home/desktop/lock.nix).
+  # swaylock-plugin owns the keyboard grab, so the lock's tmux panes can never
+  # see keystrokes directly. Instead we hook swaylock-plugin's PAM stack with
+  # pam_exec: on every password submit it runs this script, which reads ONLY the
+  # length of the typed password (via expose_authtok on stdin) and appends
+  # "<epoch> <len>" to a per-user state file. The lock's feedback pane tails that
+  # file to draw the password mask and the failed-attempt counter. The password
+  # itself is never stored, logged, or written anywhere — only its length. The
+  # rule is `optional`, so this script's exit status can never block or fail an
+  # unlock, and it appends to a plain file (never a FIFO) so it can never hang.
+  lockFeedbackHook = pkgs.writeShellScript "lock-feedback-hook" ''
+    dir="/run/user/$(${pkgs.coreutils}/bin/id -u)"
+    [ -d "$dir" ] || exit 0
+    IFS= read -r pw 2>/dev/null || true
+    len=''${#pw}
+    pw=
+    printf '%s %s\n' "$(${pkgs.coreutils}/bin/date +%s)" "$len" \
+      >> "$dir/lock-feedback" 2>/dev/null || true
+    exit 0
+  '';
+in
 {
   programs.niri.enable = true;
 
@@ -34,7 +56,19 @@
   # every password (correct ones included). We define both names so either
   # binary works.
   security.pam.services.swaylock = { };
-  security.pam.services.swaylock-plugin = { };
+  security.pam.services.swaylock-plugin = {
+    # Run the console-feedback hook on every auth attempt. `optional` means its
+    # result is ignored (it can never affect whether the unlock succeeds), and
+    # `expose_authtok` feeds the typed password to the script on stdin so it can
+    # measure its length for the on-screen mask. Ordered just before pam_unix
+    # (default order 11500) so it fires on every submit.
+    rules.auth.exec = {
+      order = 11400;
+      control = "optional";
+      modulePath = "${pkgs.pam}/lib/security/pam_exec.so";
+      args = [ "expose_authtok" "quiet" "${lockFeedbackHook}" ];
+    };
+  };
 
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
 

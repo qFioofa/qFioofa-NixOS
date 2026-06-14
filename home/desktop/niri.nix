@@ -309,6 +309,13 @@ in
       "Mod+WheelScrollUp".action = focus-workspace-up;
       "Mod+WheelScrollDown".action = focus-workspace-down;
 
+      # Moving between columns ("tabs") with the touchpad is handled by niri's
+      # built-in three-finger horizontal swipe (gestures are on by default) —
+      # swipe three fingers left/right to step columns, up/down to switch
+      # workspaces. We deliberately do NOT bind two-finger (TouchpadScroll*) for
+      # this: two-finger *is* the scroll gesture, so binding it consumes touchpad
+      # scroll events and breaks normal up/down scrolling in browsers and apps.
+
       "Mod+R".action = switch-preset-column-width;
       "Mod+F".action = maximize-column;
       "Mod+Shift+F".action = fullscreen-window;
