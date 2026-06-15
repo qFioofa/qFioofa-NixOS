@@ -6,6 +6,12 @@
 
     nixpkgs-nvim.url = "github:NixOS/nixpkgs/832efc09b4caf6b4569fbf9dc01bec3082a00611";
 
+    # Pinned so `nix flake update` can't drag regreet to 0.4.0, which breaks the
+    # greetd/regreet login (greeter exits, greetd crash-loops). This commit has
+    # the known-good regreet 0.3.0. Bump only after login.nix is made
+    # 0.4.0-compatible and tested on a reboot.
+    nixpkgs-regreet.url = "github:NixOS/nixpkgs/a799d3e3886da994fa307f817a6bc705ae538eeb";
+
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";

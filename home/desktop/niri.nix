@@ -31,29 +31,18 @@ in
       options = "ctrl:nocaps,grp:lalt_lshift_toggle";
     };
     input.touchpad = {
-      # tap-to-click on: 1-finger tap = left, 2-finger = right, 3-finger =
-      # middle. tap-button-map keeps that mapping explicit. (Previously tap was
-      # off to suppress accidental 3-finger middle-click pastes in apps like
-      # Figma — the tradeoff is back on now that single-touch click is wanted.)
+      # tap-to-click: 1-finger = left, 2-finger = right, 3-finger = middle.
       tap = true;
       tap-button-map = "left-right-middle";
       natural-scroll = true;
       dwt = true;                       # disable while typing
       accel-profile = "adaptive";
       scroll-method = "two-finger";
-      # button-areas: physically pressing the bottom-left = left click and
-      # bottom-right = right click (the traditional clickpad behaviour). There
-      # is no physical middle button, so no touchpad gesture middle-clicks now.
       click-method = "button-areas";
-      # Keep the touchpad live even with an external mouse plugged in.
       disabled-on-external-mouse = false;
     };
-    # Traditional mouse-wheel scrolling: wheel down scrolls content down, wheel
-    # up scrolls up. (The touchpad keeps natural-scroll independently above.)
     input.mouse.natural-scroll = false;
 
-    # Touchpad swipes (3/4-finger workspace + overview gestures) are built in;
-    # this enables the top-left hot corner to open the overview.
     gestures.hot-corners.enable = true;
 
     outputs."eDP-1".scale = 1.0;
@@ -74,8 +63,6 @@ in
       ];
       default-column-width.proportion = 1.0 / 2.0;
 
-      # Thin focus ring in a muted neutral grey so it marks the focused window
-      # without standing out. Drawn outside the window, so it doesn't eat space.
       focus-ring = {
         enable = true;
         width = 1;
@@ -95,19 +82,14 @@ in
     };
 
     animations = {
-      # Global pacing. Keep at real-time; bump temporarily for screen captures.
       slowdown = 1.0;
 
-      # Sliding between workspaces: a graceful, critically-damped glide. Softer
-      # stiffness than before so the motion reads as deliberate, not instant.
       workspace-switch.kind.spring = {
         damping-ratio = 1.0;
         stiffness = 750;
         epsilon = 0.0001;
       };
 
-      # Windows pop in with a subtle overshoot (under-damped spring) for a bit
-      # of life, and snap out quickly on close so dismissals feel immediate.
       window-open.kind.spring = {
         damping-ratio = 0.82;
         stiffness = 700;
@@ -118,9 +100,6 @@ in
         curve = "ease-out-quad";
       };
 
-      # View scroll and column/window reflow share one springy character so the
-      # whole layout moves as a single cohesive surface. window-movement is a
-      # touch livelier (lower damping) to make reordering feel tactile.
       horizontal-view-movement.kind.spring = {
         damping-ratio = 1.0;
         stiffness = 750;
@@ -137,20 +116,17 @@ in
         epsilon = 0.0001;
       };
 
-      # Overview zoom — a soft, slightly lively spring matching window-open.
       overview-open-close.kind.spring = {
         damping-ratio = 0.9;
         stiffness = 800;
         epsilon = 0.0001;
       };
 
-      # Screenshot UI scales/fades in with a quick, clean ease.
       screenshot-ui-open.kind.easing = {
         duration-ms = 200;
         curve = "ease-out-quad";
       };
 
-      # The config-reload toast keeps its playful bounce.
       config-notification-open-close.kind.spring = {
         damping-ratio = 0.6;
         stiffness = 1000;
@@ -207,8 +183,8 @@ in
     spawn-at-startup = [
       { command = [ "waybar" ]; }
       { command = [ "${randomWallpaper}" ]; }
-      # Polkit authentication agent (swayosd/swaync/nm-applet already run as
-      # systemd user services; this is the one missing piece for GUI auth).
+      # Polkit authentication agent for GUI auth prompts (the other user
+      # services already run via systemd).
       { command = [ "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1" ]; }
       { command = [ "wl-paste" "--type" "text" "--watch" "cliphist" "store" ]; }
       { command = [ "wl-paste" "--type" "image" "--watch" "cliphist" "store" ]; }
@@ -218,20 +194,15 @@ in
 
       "Mod+Return".action = spawn "ghostty";
       "Mod+D".action = spawn "rofi" "-show" "drun";
-      # Rofi-style fuzzy switcher over all open windows (classic Alt+Tab).
       "Alt+Tab".action = spawn "window-switcher";
       "Mod+E".action = spawn "nemo";
       "Mod+Q".action = close-window;
 
       "Mod+Shift+Q".action = spawn "powermenu";
-      # Fullscreen wlogout overlay (toggle: press again to dismiss). Spawned
-      # by absolute profile path since niri's spawn PATH does not reliably
-      # include the home-manager profile (see the lock bind below).
+      # wlogout-toggle and lock are home-manager packages; niri's spawn PATH
+      # does not reliably include the HM profile, so reference it by absolute
+      # path to make the binds fire regardless of PATH.
       "Mod+Escape".action = spawn "${config.home.profileDirectory}/bin/wlogout-toggle";
-      # Win+Alt+L. Spawned by absolute path: `lock` is a home-manager package,
-      # and niri's spawn PATH does not reliably include the HM profile
-      # (unlike the old `swaylock`, which was a system binary). Referencing the
-      # profile directory makes the bind fire regardless of PATH.
       "Mod+Alt+L".action = spawn "${config.home.profileDirectory}/bin/lock";
 
       "Mod+V".action = spawn "sh" "-c" "cliphist list | rofi -dmenu -p 'Clipboard' | cliphist decode | wl-copy";
@@ -239,15 +210,12 @@ in
       "Mod+N".action = spawn "swaync-client" "-cl";
       "Mod+Shift+N".action = spawn "swaync-client" "-C";
 
-      # Wi-Fi / Bluetooth rofi popups (Q19).
       "Mod+Shift+W".action = spawn "wifi-popup";
       "Mod+Shift+B".action = spawn "bt-popup";
 
-      # Rofi calendar + date-tools app (also opened by clicking the clock).
       "Mod+Shift+C".action = spawn "calendar";
 
-      # Toggle the waybar (SIGUSR1 hides/shows it), the overview, and a themed
-      # keybinding cheat-sheet.
+      # SIGUSR1 toggles waybar visibility.
       "Mod+B".action = spawn "${pkgs.procps}/bin/pkill" "--signal" "SIGUSR1" "waybar";
       "Mod+O".action = toggle-overview;
       "Mod+Slash".action = spawn "help-manual";
@@ -309,12 +277,9 @@ in
       "Mod+WheelScrollUp".action = focus-workspace-up;
       "Mod+WheelScrollDown".action = focus-workspace-down;
 
-      # Moving between columns ("tabs") with the touchpad is handled by niri's
-      # built-in three-finger horizontal swipe (gestures are on by default) —
-      # swipe three fingers left/right to step columns, up/down to switch
-      # workspaces. We deliberately do NOT bind two-finger (TouchpadScroll*) for
-      # this: two-finger *is* the scroll gesture, so binding it consumes touchpad
-      # scroll events and breaks normal up/down scrolling in browsers and apps.
+      # Column/workspace stepping uses niri's built-in three-finger swipe. Do
+      # NOT bind two-finger (TouchpadScroll*): two-finger is the scroll gesture,
+      # so binding it consumes scroll events and breaks scrolling in apps.
 
       "Mod+R".action = switch-preset-column-width;
       "Mod+F".action = maximize-column;
@@ -345,7 +310,6 @@ in
     };
   };
 
-  # Guarantee the screenshot target directory exists (screenshot-path above
-  # writes here and won't create missing parents).
+  # screenshot-path won't create missing parents, so ensure the dir exists.
   home.file."Pictures/Screenshots/.keep".text = "";
 }

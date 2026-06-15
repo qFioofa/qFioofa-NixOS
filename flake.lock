@@ -125,6 +125,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-regreet": {
+      "locked": {
+        "lastModified": 1780749050,
+        "narHash": "sha256-3av0pIjlOWQ6rDbNOmpUSvbNnJkGORQKKjb4LtCZsIY=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "a799d3e3886da994fa307f817a6bc705ae538eeb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "a799d3e3886da994fa307f817a6bc705ae538eeb",
+        "type": "github"
+      }
+    },
     "nixpkgs-stable": {
       "locked": {
         "lastModified": 1780952837,
@@ -148,6 +164,7 @@
         "niri": "niri",
         "nixpkgs": "nixpkgs",
         "nixpkgs-nvim": "nixpkgs-nvim",
+        "nixpkgs-regreet": "nixpkgs-regreet",
         "tg-ws-proxy": "tg-ws-proxy",
         "tmux-config": "tmux-config",
         "wezterm-config": "wezterm-config",
