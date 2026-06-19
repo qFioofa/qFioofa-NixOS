@@ -180,7 +180,7 @@ in
       # Status + system capsule.
       "group/right-b" = {
         orientation = "horizontal";
-        modules = [ "network" "bluetooth" "battery" "custom/swaync" "custom/power" ];
+        modules = [ "network" "bluetooth" "battery" "custom/swaync" "custom/settings" "custom/power" ];
       };
 
       clock = {
@@ -234,6 +234,14 @@ in
         on-click = "swaync-client -t -sw";
         on-click-right = "swaync-client -d -sw";
         escape = true;
+      };
+
+      # Settings gear — opens GNOME Settings (the wrapped gnome-control-center
+      # from home/programs/apps.nix; resolved by name via the session PATH).
+      "custom/settings" = {
+        tooltip = false;
+        format = "󰒓";
+        on-click = "gnome-control-center";
       };
 
       "custom/power" = {
@@ -430,6 +438,18 @@ in
       }
 
       #custom-swaync:hover {
+        color: ${fg};
+      }
+
+      #custom-settings {
+        padding: 0 10px;
+        margin: 6px 0;
+        border-left: 1px solid ${bgSurface};
+        color: ${fgDim};
+        transition: color 180ms cubic-bezier(0.33, 1, 0.68, 1);
+      }
+
+      #custom-settings:hover {
         color: ${fg};
       }
 

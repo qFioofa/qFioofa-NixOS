@@ -10,6 +10,8 @@
     # ./tg-ws-proxy.nix
     ./audio.nix
     ./bluetooth.nix
+    ./fingerprint.nix
+    ./nix-ld.nix
     ./huawei.nix
     ./users.nix
     ./docker.nix

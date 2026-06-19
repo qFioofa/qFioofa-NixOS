@@ -1,17 +1,9 @@
-{ inputs, pkgs, ... }:
-let
-  pkgsNvim = inputs.nixpkgs-nvim.legacyPackages.${pkgs.system};
-
-  neovim-0_11_7 = pkgsNvim.neovim-unwrapped.overrideAttrs (old: rec {
-    version = "0.11.7";
-    src = pkgsNvim.fetchFromGitHub {
-      owner = "neovim";
-      repo = "neovim";
-      rev = "v${version}";
-      hash = "sha256-NAZAp4WSKYcEmwzhTy/OwYY4KO/dsUtjD0ddzMwm+8Q=";
-    };
-  });
-in
+{ inputs, ... }:
 {
-  home.packages = [ (pkgsNvim.wrapNeovim neovim-0_11_7 { }) ];
+  # Single source of truth: the FHS-wrapped Neovim 0.11.7 (with Mason support)
+  # and config come straight from the qFioofa-Nvim flake — the exact same
+  # package as `nix profile install github:qFioofa/qFioofa-Nvim`. Keeping the
+  # definition here would let the two drift; importing the module guarantees
+  # nvim is universally identical everywhere.
+  imports = [ inputs.nvim-config.homeManagerModules.default ];
 }

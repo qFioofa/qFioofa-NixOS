@@ -171,6 +171,15 @@ in
         matches = [{ app-id = "^org\\.keepassxc\\.KeePassXC$"; }];
         block-out-from = "screencast";
       }
+      {
+        # First window opened right after login (empty desktop) starts
+        # fullscreen. at-startup matches windows created within the first ~60s
+        # of the niri session; the layer-shell startup pieces (waybar,
+        # wallpaper, polkit agent, cliphist) are not windows, so this only
+        # affects the first real app you launch.
+        matches = [{ at-startup = true; }];
+        open-fullscreen = true;
+      }
     ];
 
     prefer-no-csd = true;

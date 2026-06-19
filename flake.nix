@@ -34,6 +34,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    nvim-config.url = "github:qFioofa/qFioofa-Nvim";
     ghostty-config.url = "github:qFioofa/qFioofa-Ghostty";
     zsh-config.url = "github:qFioofa/qFioofa-zsh";
     wezterm-config.url = "github:qFioofa/qFioofa-wezterm";
