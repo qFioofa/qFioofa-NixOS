@@ -13,26 +13,7 @@ let
 
   # Domains to desync. Scoped per-profile via --hostlist so nothing else on the
   # machine is touched. nfqws auto-matches subdomains, so the apex is enough.
-  hostlist = pkgs.writeText "zapret-hostlist" (builtins.concatStringsSep "\n" [
-    # YouTube / Google video
-    "youtube.com"
-    "youtu.be"
-    "googlevideo.com"
-    "ytimg.com"
-    "ggpht.com"
-    "youtubei.googleapis.com"
-    "jnn-pa.googleapis.com"
-    "googleapis.com"
-    "gstatic.com"
-    "gvt1.com"
-    "google.com"
-    # Discord
-    "discord.com"
-    "discord.gg"
-    "discord.media"
-    "discordapp.com"
-    "discordapp.net"
-  ]);
+  hostlist = pkgs.writeText "zapret-hostlist" (pkgs.lib.fileContents ./data/zapret-hostlist.txt);
 in
 {
   # DPI-bypass daemon, using nixpkgs' built-in module. Its iptables rules use

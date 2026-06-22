@@ -10,16 +10,10 @@ let
   # itself is never stored, logged, or written anywhere — only its length. The
   # rule is `optional`, so this script's exit status can never block or fail an
   # unlock, and it appends to a plain file (never a FIFO) so it can never hang.
-  lockFeedbackHook = pkgs.writeShellScript "lock-feedback-hook" ''
-    dir="/run/user/$(${pkgs.coreutils}/bin/id -u)"
-    [ -d "$dir" ] || exit 0
-    IFS= read -r pw 2>/dev/null || true
-    len=''${#pw}
-    pw=
-    printf '%s %s\n' "$(${pkgs.coreutils}/bin/date +%s)" "$len" \
-      >> "$dir/lock-feedback" 2>/dev/null || true
-    exit 0
-  '';
+  lockFeedbackHook = pkgs.writeShellScript "lock-feedback-hook" (builtins.readFile (pkgs.replaceVars ./scripts/lock-feedback-hook.sh {
+    id = "${pkgs.coreutils}/bin/id";
+    date = "${pkgs.coreutils}/bin/date";
+  }));
 in
 {
   programs.niri.enable = true;

@@ -1,8 +1,6 @@
 { pkgs, ... }:
 {
   home.packages = with pkgs; [
-    # Python interpreter bundled with data-science libraries so that
-    # `jupyter`, `python`, and `ipython` all share the same environment.
     (python3.withPackages (ps: with ps; [
       # Jupyter
       jupyterlab         # next-gen Jupyter web IDE

@@ -1,0 +1,67 @@
+# Flat background matching theme.nix `bg` (#151515).
+Window.SetBackgroundTopColor(0.082, 0.082, 0.082);
+Window.SetBackgroundBottomColor(0.082, 0.082, 0.082);
+
+screen_width  = Window.GetWidth();
+screen_height = Window.GetHeight();
+
+# --- centred logo (drawn above the ripples) ---
+logo.image  = Image("logo.png");
+logo.sprite = Sprite();
+logo.sprite.SetImage(logo.image);
+logo.sprite.SetX((screen_width  - logo.image.GetWidth())  / 2);
+logo.sprite.SetY((screen_height - logo.image.GetHeight()) / 2);
+logo.sprite.SetZ(10);
+
+# --- water ripples: one ring image, scaled up across several staggered
+#     sprites so a new ring sets off roughly every second ---
+ring_image = Image("ripple.png");
+ring_w = ring_image.GetWidth();
+ring_h = ring_image.GetHeight();
+
+count  = 4;                 # concurrent rings
+period = 55;                # ticks between launches (~1.1s at 50Hz)
+life   = count * period;    # ticks a ring lives before it recycles
+
+for (i = 0; i < count; i++) {
+  ring[i] = Sprite();
+  ring[i].SetZ(5);          # behind the logo (Z=10)
+  age[i] = i * period;      # evenly staggered phases
+}
+
+tick = 0;
+fun refresh_callback() {
+  tick = tick + 1;
+
+  # Soft breathing of the logo, ~4.5s per cycle.
+  logo.sprite.SetOpacity(0.82 + 0.18 * Math.Sin(tick / 36));
+
+  for (i = 0; i < count; i++) {
+    age[i] = age[i] + 1;
+    if (age[i] >= life) { age[i] = 0; }
+
+    t = age[i] / life;                 # 0 .. 1 progress
+    scale = 0.30 + 1.70 * t;           # grow outward from the centre
+    w = ring_w * scale;
+    h = ring_h * scale;
+
+    scaled = ring_image.Scale(w, h);
+    ring[i].SetImage(scaled);
+    ring[i].SetX((screen_width  - w) / 2);
+    ring[i].SetY((screen_height - h) / 2);
+    # Rise then fall — soft, peaks mid-life and never harsh.
+    ring[i].SetOpacity(0.40 * Math.Sin(t * 3.14159265));
+  }
+}
+Plymouth.SetRefreshFunction(refresh_callback);
+
+# --- subtle status line in a muted fg colour (theme.nix `fgMuted`) ---
+status.sprite = Sprite();
+fun message_callback(text) {
+  status.image = Image.Text(text, 0.41, 0.41, 0.41);
+  status.sprite.SetImage(status.image);
+  status.sprite.SetX((screen_width - status.image.GetWidth()) / 2);
+  status.sprite.SetY(screen_height * 0.86);
+  status.sprite.SetZ(20);
+}
+Plymouth.SetMessageFunction(message_callback);

@@ -4,7 +4,6 @@
     enable = true;
     package = pkgs.postgresql_17;
 
-    # Listen only on the loopback interface by default.
     enableTCPIP = false;
 
     ensureDatabases = [ "qFioofa" ];

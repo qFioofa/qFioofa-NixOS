@@ -1,0 +1,80 @@
+@define-color yugen_bg @bg@;
+@define-color yugen_surface @bgSurface@;
+@define-color yugen_fg @fg@;
+@define-color yugen_fg_dim @fgDim@;
+@define-color yugen_fg_muted @fgMuted@;
+@define-color yugen_primary @primary@;
+@define-color yugen_error @error@;
+
+window { background-color: transparent; }
+
+.background {
+  background-color: alpha(@yugen_bg, 0.78);
+  color: @yugen_fg;
+  border: 1px solid alpha(@yugen_primary, 0.22);
+  border-radius: 18px;
+  padding: 26px 30px;
+  box-shadow: 0 18px 60px alpha(black, 0.6);
+}
+
+#message_label {
+  color: @yugen_primary;
+  font-weight: bold;
+  font-size: 1.35em;
+  margin-bottom: 8px;
+}
+
+/* Hero clock: large time, the date/format string reads as a quiet caption. */
+#clock_frame label {
+  color: @yugen_fg;
+  font-size: 2.4em;
+  font-weight: 300;
+  letter-spacing: 1px;
+  margin-bottom: 14px;
+}
+
+label { color: @yugen_fg_dim; }
+
+entry, passwordentry {
+  background-color: alpha(@yugen_surface, 0.9);
+  color: @yugen_fg;
+  border: 1px solid alpha(@yugen_fg, 0.15);
+  border-radius: 10px;
+  caret-color: @yugen_primary;
+  min-height: 36px;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+entry:focus-within, passwordentry:focus-within {
+  border-color: @yugen_primary;
+  box-shadow: 0 0 0 2px alpha(@yugen_primary, 0.3);
+}
+
+dropdown, dropdown > button, combobox button {
+  background-color: alpha(@yugen_surface, 0.9);
+  color: @yugen_fg;
+  border: 1px solid alpha(@yugen_fg, 0.15);
+  border-radius: 10px;
+}
+
+button {
+  border-radius: 10px;
+  background-color: alpha(@yugen_surface, 0.9);
+  color: @yugen_fg;
+  border: 1px solid alpha(@yugen_fg, 0.1);
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+button:hover { background-color: alpha(@yugen_primary, 0.18); }
+
+button.suggested-action {
+  background-color: @yugen_primary;
+  color: @yugen_bg;
+  font-weight: bold;
+  border: none;
+}
+button.suggested-action:hover { background-color: shade(@yugen_primary, 1.08); }
+
+button.destructive-action {
+  color: @yugen_error;
+  background-color: alpha(@yugen_error, 0.12);
+  border: 1px solid alpha(@yugen_error, 0.4);
+}

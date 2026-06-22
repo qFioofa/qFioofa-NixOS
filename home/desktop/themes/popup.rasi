@@ -1,0 +1,57 @@
+* {
+  bg:         @bg@;
+  bg-surface: @bgSurface@;
+  fg:         @fg@;
+  fg-dim:     @fgDim@;
+  fg-muted:   @fgMuted@;
+  accent:     @primary@;
+  background-color: transparent;
+  text-color:       @fg;
+}
+window {
+  width:         320px;
+  border:        @border@;
+  border-color:  @accent;
+  border-radius: @radius@;
+  background-color: @bg;
+  location: north east;
+  anchor:   north east;
+  x-offset: -8px;
+  y-offset: 48px;
+}
+mainbox {
+  padding: 12px;
+  spacing: 8px;
+  background-color: transparent;
+}
+inputbar {
+  spacing: 8px;
+  padding: 8px 12px;
+  border-radius: @radiusInner@;
+  background-color: @bg-surface;
+  children: [ prompt, entry ];
+}
+prompt { text-color: @accent; }
+entry {
+  placeholder: "Search...";
+  placeholder-color: @fg-muted;
+  text-color: @fg;
+}
+listview {
+  lines:    8;
+  spacing:  4px;
+  scrollbar: false;
+  background-color: transparent;
+}
+element {
+  padding: 8px 12px;
+  spacing: 8px;
+  border-radius: @radiusInner@;
+  background-color: transparent;
+  text-color: @fg-dim;
+}
+element selected {
+  background-color: @bg-surface;
+  text-color: @accent;
+}
+element-text { text-color: inherit; vertical-align: 0.5; }

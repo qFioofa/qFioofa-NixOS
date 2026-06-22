@@ -2,36 +2,6 @@
 let
   cfg = config.hardware.huawei.matebook;
 
-  # --- SOF topology filename compat shim (the real "no sound" fix) -------------
-  # On Tiger Lake the ESSX8336 machine driver builds the topology filename by
-  # appending only the DMIC count, e.g. `sof-tgl-es8336-dmic2ch.tplg` — it does
-  # NOT append an `-sspN` suffix (that suffix is gated by a per-platform
-  # tplg_quirk_mask that TGL does not set). But current sof-firmware only ships
-  # the SSP-suffixed variants (`...-dmic2ch-ssp0.tplg.zst`, `-ssp1`, `-ssp2`),
-  # so the exact name the kernel asks for is missing and SOF aborts with
-  #   SOF firmware and/or topology file not found ... err: -2
-  # leaving a silent "Dummy Output". The ES8336 on these boards sits on SSP0, so
-  # we just expose the SSP0 topology under the bare name the kernel requests.
-  #
-  # pkgs.sof-firmware ships uncompressed .tplg files; NixOS compresses the main
-  # package into the merged tree itself. We keep this shim uncompressed
-  # (compressFirmware=false) and add only the new bare names as symlinks to the
-  # real SSP0 topology — the kernel asks for the uncompressed name first, so a
-  # plain .tplg is found directly with no collision against the -sspN variants.
-  #
-  # NOTE (qFioofa / BoDE-WXX9, 2026-06): on this unit the SOF path is a dead end,
-  # so the shim is moot there. The ES8336 sits on LPSS I2C controller #2
-  # (\_SB_.PC00.I2C2.ESSX = PCI 00:15.2), and that PCI function is
-  # *function-disabled in firmware* — it returns nothing even to direct CF8/CFC
-  # port I/O (`lspci -A intel-conf1 -s 00:15.2`), so it is gone, not merely
-  # hidden, and no kernel/modprobe/PMC poke can bring it back (the disable is
-  # latched at reset). Under SOF the es8336 machine driver therefore waits
-  # forever for its codec (`deferred probe pending`) and no card registers — the
-  # silent "Dummy Output". The working audio on this board is the OTHER codec, a
-  # Conexant CX11880 analog HDA codec on the normal HDA link, reached via
-  # audioDriver = "hda" (see hosts/qFioofa/hardware.nix). Re-enabling the ES8336
-  # path for the internal DMIC would need I2C2 enabled in firmware (Huawei BIOS
-  # update / FSP UPD SerialIoI2cEnable[2]).
   sofEs8336TglTplgCompat = pkgs.runCommand "sof-tgl-es8336-tplg-compat"
     { passthru.compressFirmware = false; } ''
       d="$out/lib/firmware/intel/sof-tplg"

@@ -9,15 +9,13 @@ let
   # passed in. Persist a random secret under the service's StateDirectory so the
   # Telegram connection details stay stable across restarts; create it on first
   # run if missing.
-  startScript = pkgs.writeShellScript "tg-ws-proxy-start" ''
-    set -eu
-    secret_file="$STATE_DIRECTORY/secret"
-    if [ ! -s "$secret_file" ]; then
-      ${pkgs.openssl}/bin/openssl rand -hex 16 > "$secret_file"
-    fi
-    secret=$(${pkgs.coreutils}/bin/cat "$secret_file")
-    exec ${proxy}/bin/tg-ws-proxy --host ${host} --port ${toString port} --secret "$secret"
-  '';
+  startScript = pkgs.writeShellScript "tg-ws-proxy-start" (builtins.readFile (pkgs.replaceVars ./scripts/tg-ws-proxy-start.sh {
+    openssl = "${pkgs.openssl}/bin/openssl";
+    cat = "${pkgs.coreutils}/bin/cat";
+    proxy = "${proxy}/bin/tg-ws-proxy";
+    inherit host;
+    port = toString port;
+  }));
 in
 {
   # Local MTProto proxy for Telegram. Point Telegram Desktop at

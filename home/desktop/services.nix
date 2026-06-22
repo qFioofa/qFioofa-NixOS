@@ -3,29 +3,7 @@
 
   services.swayosd = {
     enable = true;
-    stylePath = pkgs.writeText "swayosd-style.css" ''
-      window {
-        background: rgba(21, 21, 21, 0.92);
-        border: 2px solid #303030;
-        border-radius: 12px;
-      }
-      #container {
-        margin: 14px;
-      }
-      image,
-      label {
-        color: #D4D4D4;
-      }
-      progressbar {
-        min-height: 6px;
-        border-radius: 999px;
-        background: #303030;
-      }
-      progressbar progress {
-        border-radius: 999px;
-        background: #FFBE89;
-      }
-    '';
+    stylePath = ./themes/swayosd-style.css;
   };
 
   services.kanshi = {

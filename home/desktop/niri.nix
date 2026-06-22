@@ -3,13 +3,12 @@ let
   theme = import ../../theme.nix;
   inherit (theme) bg bgSurface fgMuted;
 
-  randomWallpaper = pkgs.writeShellScript "random-wallpaper" ''
-    dir=${../../wallpaper}
-    wallpaper=$(${pkgs.findutils}/bin/find "$dir" \
-      -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \) \
-      | ${pkgs.coreutils}/bin/shuf -n 1)
-    exec ${pkgs.swaybg}/bin/swaybg -i "$wallpaper" -m fill
-  '';
+  randomWallpaper = pkgs.writeShellScript "random-wallpaper" (builtins.readFile (pkgs.replaceVars ./scripts/random-wallpaper.sh {
+    wallpaperDir = "${../../wallpaper}";
+    find = "${pkgs.findutils}/bin/find";
+    shuf = "${pkgs.coreutils}/bin/shuf";
+    swaybg = "${pkgs.swaybg}/bin/swaybg";
+  }));
 in
 {
   programs.niri.settings = {
