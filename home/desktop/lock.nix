@@ -141,10 +141,25 @@ in
         before_sleep_cmd = "${lockBin}/bin/lock";
         after_sleep_cmd = "niri msg action power-on-monitors";
       };
+      # Timeouts are cumulative from the last input, so each step counts from
+      # boot/activity, not from the previous listener.
       listener = [
         {
-          timeout = 600; # 10 min idle → lock the session (screen stays on).
+          timeout = 300; # 5 min idle → lock the session.
           on-timeout = "${lockBin}/bin/lock";
+        }
+        {
+          # 1 min into the lock → blank the outputs. The lock's animated
+          # dashboard renders fullscreen, so the backlight and GPU compositing
+          # are its real power draw; powering the monitors off stops both while
+          # the session stays locked. Any input wakes them straight back on.
+          timeout = 360;
+          on-timeout = "niri msg action power-off-monitors";
+          on-resume = "niri msg action power-on-monitors";
+        }
+        {
+          timeout = 900; # 10 min into the lock (15 min idle) → suspend.
+          on-timeout = "systemctl suspend";
         }
       ];
     };

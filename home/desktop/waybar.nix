@@ -146,11 +146,12 @@ in
 
       clock = {
         format = "󰥔  {:%H:%M}";
-        format-alt = "󰃭  {:%a %d %b %Y}";
         tooltip-format = "<tt>{calendar}</tt>";
         # Left-click opens the rofi calendar + date-tools app (the notification
-        # center stays on the bell icon). The tooltip calendar below is kept as
-        # a quick at-a-glance peek.
+        # center stays on the bell icon). No format-alt here on purpose: Waybar's
+        # left-click toggles format-alt *and* runs on-click, so a date format
+        # would flip the clock to the date on every click — we only want rofi.
+        # The tooltip calendar stays as a quick at-a-glance peek on hover.
         on-click = "calendar";
         calendar = {
           mode = "month";
