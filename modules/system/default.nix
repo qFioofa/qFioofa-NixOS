@@ -16,5 +16,6 @@
     ./users.nix
     ./docker.nix
     ./db.nix
+    ./languages
   ];
 }

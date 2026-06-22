@@ -1,10 +1,9 @@
 { pkgs, ... }:
 {
-  home.packages = with pkgs; [
+  environment.systemPackages = with pkgs; [
     nodejs
     rustc
     cargo
-    gcc
     go
     zig
     elixir

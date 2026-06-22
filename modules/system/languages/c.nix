@@ -1,6 +1,7 @@
 { pkgs, ... }:
 {
-  home.packages = with pkgs; [
+  environment.systemPackages = with pkgs; [
+    gcc
     clang-tools
     gnumake
     cmakeCurses
