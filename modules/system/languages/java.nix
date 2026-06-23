@@ -5,6 +5,5 @@
     maven
     gradle
     jdt-language-server
-    google-java-format
   ];
 }

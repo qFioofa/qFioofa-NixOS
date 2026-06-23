@@ -9,6 +9,7 @@
     #./zapret.nix
     # ./tg-ws-proxy.nix
     ./audio.nix
+    ./bash.nix
     ./bluetooth.nix
     ./fingerprint.nix
     ./nix-ld.nix

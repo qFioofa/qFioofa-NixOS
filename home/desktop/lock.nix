@@ -129,6 +129,25 @@ let
     swaylockColors = swaylockColors;
     lockBackground = "${lockBackground}";
   });
+
+  # Persist the backlight level, but only while the screen is actually lit.
+  # During an idle suspend the monitors have already been DPMS-powered-off (see
+  # the 360s listener below), which drops intel_backlight to 0, so a plain
+  # `brightnessctl --save` at suspend time would capture 0 and the matching
+  # restore would black the screen on resume. Skip any non-positive reading and
+  # keep the last good value instead.
+  saveBrightness = pkgs.writeShellScript "lock-save-brightness" ''
+    cur=$(${brightnessctl} get)
+    if [ "''${cur:-0}" -gt 0 ]; then
+      printf '%s' "$cur" > "$XDG_RUNTIME_DIR/lock-brightness"
+    fi
+  '';
+  restoreBrightness = pkgs.writeShellScript "lock-restore-brightness" ''
+    val=$(${cat} "$XDG_RUNTIME_DIR/lock-brightness" 2>/dev/null || true)
+    if [ "''${val:-0}" -gt 0 ]; then
+      ${brightnessctl} set "$val"
+    fi
+  '';
 in
 {
   home.packages = [ lockBin ];
@@ -138,24 +157,45 @@ in
     settings = {
       general = {
         lock_cmd = "${lockBin}/bin/lock";
-        before_sleep_cmd = "${lockBin}/bin/lock";
-        after_sleep_cmd = "niri msg action power-on-monitors";
+        # Snapshot the backlight level just before sleep and put it back on
+        # resume, so suspending never leaves the screen dimmed (some laptops
+        # reset the backlight to minimum across suspend). saveBrightness refuses
+        # to persist a 0 reading, so an idle suspend — where the monitors are
+        # already DPMS-off — falls back to the good value captured at lock time.
+        before_sleep_cmd = "${pkgs.writeShellScript "lock-before-sleep" ''
+          ${saveBrightness}
+          exec ${lockBin}/bin/lock
+        ''}";
+        after_sleep_cmd = "${pkgs.writeShellScript "after-sleep-restore" ''
+          niri msg action power-on-monitors
+          ${restoreBrightness}
+        ''}";
       };
       # Timeouts are cumulative from the last input, so each step counts from
       # boot/activity, not from the previous listener.
       listener = [
         {
-          timeout = 300; # 5 min idle → lock the session.
-          on-timeout = "${lockBin}/bin/lock";
+          # 5 min idle → lock the session. Snapshot the backlight here, while
+          # the screen is still lit, so the value is available to restore even
+          # though the later power-off/suspend steps drop it to 0.
+          timeout = 300;
+          on-timeout = "${pkgs.writeShellScript "lock-on-idle" ''
+            ${saveBrightness}
+            exec ${lockBin}/bin/lock
+          ''}";
         }
         {
           # 1 min into the lock → blank the outputs. The lock's animated
           # dashboard renders fullscreen, so the backlight and GPU compositing
           # are its real power draw; powering the monitors off stops both while
-          # the session stays locked. Any input wakes them straight back on.
+          # the session stays locked. Any input wakes them straight back on, and
+          # restoreBrightness undoes the 0 the DPMS-off left behind.
           timeout = 360;
           on-timeout = "niri msg action power-off-monitors";
-          on-resume = "niri msg action power-on-monitors";
+          on-resume = "${pkgs.writeShellScript "lock-power-on" ''
+            niri msg action power-on-monitors
+            ${restoreBrightness}
+          ''}";
         }
         {
           timeout = 900; # 10 min into the lock (15 min idle) → suspend.

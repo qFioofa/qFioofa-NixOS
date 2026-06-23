@@ -7,5 +7,6 @@
     ./ghostty.nix
     ./tmux.nix
     ./wezterm.nix
+    ./clangd.nix
   ];
 }

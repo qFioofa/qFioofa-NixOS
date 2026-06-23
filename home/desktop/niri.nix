@@ -177,6 +177,9 @@ in
         # wallpaper, polkit agent, cliphist) are not windows, so this only
         # affects the first real app you launch.
         matches = [{ at-startup = true; }];
+        # The terminal (Mod+Return) is the usual first thing launched right
+        # after login, but it should open at normal column width, not fullscreen.
+        excludes = [{ app-id = "^com\\.mitchellh\\.ghostty$"; }];
         open-fullscreen = true;
       }
     ];
@@ -201,7 +204,10 @@ in
     binds = with config.lib.niri.actions; {
 
       "Mod+Return".action = spawn "ghostty";
-      "Mod+D".action = spawn "rofi" "-show" "drun";
+      # finalPackage is the rofi wrapped with its plugins (calc/emoji); niri's
+      # spawn PATH is not guaranteed to resolve them, so reference it directly.
+      "Mod+D".action = spawn "${config.programs.rofi.finalPackage}/bin/rofi" "-show" "drun";
+      "Mod+Period".action = spawn "${config.programs.rofi.finalPackage}/bin/rofi" "-show" "emoji";
       "Alt+Tab".action = spawn "window-switcher";
       "Mod+E".action = spawn "nemo";
       "Mod+Q".action = close-window;

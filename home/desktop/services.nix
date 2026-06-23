@@ -37,4 +37,13 @@
   };
 
   services.network-manager-applet.enable = true;
+
+  # Keep blueman-manager available for the waybar bluetooth module, but stop the
+  # tray applet from auto-starting. A user-level Hidden autostart entry overrides
+  # the system blueman.desktop, so systemd's xdg-autostart generator skips it
+  # (no more app-blueman@autostart at login).
+  xdg.configFile."autostart/blueman.desktop".text = ''
+    [Desktop Entry]
+    Hidden=true
+  '';
 }
