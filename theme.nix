@@ -16,6 +16,11 @@
   # Shared design tokens so popups, the control center, and floating
   # notifications read as one system (see popups.nix / notifications.nix).
   font = "JetBrainsMono Nerd Font";
+
+  # The one wallpaper, shared by the desktop (niri.nix) and login greeter
+  # (login.nix). Swap this single path to change the background everywhere.
+  wallpaper = ./wallpaper/b-147.jpg;
+
   radius = "12px"; # outer surfaces (windows, control center)
   radiusInner = "8px"; # inner elements (inputs, buttons, list rows)
   border = "2px"; # accent border width

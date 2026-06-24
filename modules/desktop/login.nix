@@ -32,7 +32,7 @@ let
   # light blur, and dim it ~35% so the login card and clock stay readable no
   # matter how busy the source image is. ReGreet can't blur/dim on its own.
   dimmedBackground = pkgs.runCommand "regreet-bg.jpg" { } ''
-    ${pkgs.imagemagick}/bin/magick ${../../wallpaper/b-102.jpg} \
+    ${pkgs.imagemagick}/bin/magick ${theme.wallpaper} \
       -resize 1920x1080^ -gravity center -extent 1920x1080 \
       -blur 0x4 \
       -fill black -colorize 32% \

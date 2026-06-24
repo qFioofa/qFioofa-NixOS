@@ -2,13 +2,6 @@
 let
   theme = import ../../theme.nix;
   inherit (theme) bg bgSurface fgMuted;
-
-  randomWallpaper = pkgs.writeShellScript "random-wallpaper" (builtins.readFile (pkgs.replaceVars ./scripts/random-wallpaper.sh {
-    wallpaperDir = "${../../wallpaper}";
-    find = "${pkgs.findutils}/bin/find";
-    shuf = "${pkgs.coreutils}/bin/shuf";
-    swaybg = "${pkgs.swaybg}/bin/swaybg";
-  }));
 in
 {
   programs.niri.settings = {
@@ -193,7 +186,7 @@ in
 
     spawn-at-startup = [
       { command = [ "waybar" ]; }
-      { command = [ "${randomWallpaper}" ]; }
+      { command = [ "${pkgs.swaybg}/bin/swaybg" "-i" "${theme.wallpaper}" "-m" "fill" ]; }
       # Polkit authentication agent for GUI auth prompts (the other user
       # services already run via systemd).
       { command = [ "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1" ]; }

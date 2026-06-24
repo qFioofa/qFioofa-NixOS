@@ -1,10 +1,20 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 let
   theme = import ../../theme.nix;
   inherit (theme) bg bgSurface fg fgDim fgMuted primary radius radiusInner border font;
   mkL = value: { _type = "literal"; inherit value; };
+  # Generates override .desktop entries with a Cyrillic key-position keyword so
+  # the Apps search matches Latin-named apps typed on the RU layout. See script.
+  rofiTranslit = pkgs.writeShellScriptBin "rofi-translit"
+    (builtins.readFile (pkgs.replaceVars ./scripts/rofi-translit.sh {
+      perl = "${pkgs.perl}/bin/perl";
+    }));
 in
 {
+  home.packages = [ rofiTranslit ];
+  home.activation.rofiTranslit =
+    lib.hm.dag.entryAfter [ "writeBoundary" ] "run ${rofiTranslit}/bin/rofi-translit || true";
+
   programs.rofi = {
     enable = true;
     package = pkgs.rofi;
@@ -14,14 +24,19 @@ in
     terminal = "foot";
     font = "${font} 12";
     extraConfig = {
-      # Tabs in order (Ctrl+Tab / Ctrl+Shift+Tab to cycle):
+      # Tabs in order (Alt+Right / Alt+Left or click to cycle):
       #   Apps   — plain app launch (default, what Mod+D opens)
-      #   Apps + — combi: apps + their .desktop actions + run-commands + files
+      #   Apps + — combi: run-commands + files (NOT apps — keeps it distinct
+      #            from the Apps tab; adding drun here just duplicates Apps)
       #   Emoji  — emoji picker
       #   Run    — console programs
       #   Calc   — calculator
       modi = "drun,combi,emoji,run,calc";
-      combi-modi = "drun,run,filebrowser";
+      combi-modi = "run,filebrowser";
+      # Cycle tabs with Alt+Right / Alt+Left (Ctrl+Tab default was unreliable).
+      # Tab keeps its default next-item role.
+      kb-mode-next = "Alt+Right";
+      kb-mode-previous = "Alt+Left";
       show-icons = true;
       icon-theme = "Papirus-Dark";
       display-drun = " Apps";
@@ -35,7 +50,10 @@ in
       # keywords, comment) so e.g. "browser" finds Firefox; show .desktop
       # actions like "New Private Window" as their own entries.
       drun-match-fields = "all";
-      drun-show-actions = true;
+      # Off: hides .desktop actions ("Firefox – New Window") from the Apps
+      # list. rofi only exposes this globally, so it's all-or-nothing across
+      # every drun view — can't isolate the actions into the Apps + tab.
+      drun-show-actions = false;
       matching = "fuzzy";
       sort = true;
       sorting-method = "fzf";
