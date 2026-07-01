@@ -2,6 +2,7 @@
 {
   imports = [
     ./niri.nix
+    ./clipboard.nix
     ./gtk.nix
     ./waybar.nix
     ./calendar.nix

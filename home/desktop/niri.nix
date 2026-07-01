@@ -212,7 +212,7 @@ in
       "Mod+Escape".action = spawn "${config.home.profileDirectory}/bin/wlogout-toggle";
       "Mod+Alt+L".action = spawn "${config.home.profileDirectory}/bin/lock";
 
-      "Mod+V".action = spawn "sh" "-c" "cliphist list | rofi -dmenu -p 'Clipboard' | cliphist decode | wl-copy";
+      "Mod+V".action = spawn "${config.home.profileDirectory}/bin/clipboard-menu";
 
       "Mod+N".action = spawn "swaync-client" "-cl";
       "Mod+Shift+N".action = spawn "swaync-client" "-C";
@@ -301,7 +301,8 @@ in
       "Mod+Shift+Minus".action = set-window-height "-10%";
       "Mod+Shift+Equal".action = set-window-height "+10%";
 
-      "Print".action.screenshot = {};
+      # Lightshot-style region grab + annotate; built-ins keep window/screen.
+      "Print".action = spawn "${config.home.profileDirectory}/bin/screenshot";
       "Mod+Print".action.screenshot-window = {};
       "Ctrl+Print".action.screenshot-screen = {};
 

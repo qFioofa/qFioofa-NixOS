@@ -8,7 +8,15 @@
       name = "Papirus-Dark";
       package = pkgs.papirus-icon-theme;
     };
-    gtk3.extraConfig.gtk-enable-primary-paste = false;
-    gtk4.extraConfig.gtk-enable-primary-paste = false;
+    # Render GTK apps (Nemo, etc.) dark to match the desktop instead of the
+    # default light Adwaita.
+    gtk3.extraConfig = {
+      gtk-enable-primary-paste = false;
+      gtk-application-prefer-dark-theme = true;
+    };
+    gtk4.extraConfig = {
+      gtk-enable-primary-paste = false;
+      gtk-application-prefer-dark-theme = true;
+    };
   };
 }
