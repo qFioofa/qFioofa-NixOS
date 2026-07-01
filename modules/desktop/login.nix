@@ -5,7 +5,7 @@ let
   # regreet pinned to 0.3.0 from nixpkgs-regreet (see flake.nix). 0.4.0 is a
   # breaking release that crash-loops the greeter; keep this off the main
   # nixpkgs input so `nix flake update` can't bump it.
-  pkgsRegreet = inputs.nixpkgs-regreet.legacyPackages.${pkgs.system};
+  pkgsRegreet = inputs.nixpkgs-regreet.legacyPackages.${pkgs.stdenv.hostPlatform.system};
 
   loginUser = "qFioofa";
   defaultSession = "Niri";

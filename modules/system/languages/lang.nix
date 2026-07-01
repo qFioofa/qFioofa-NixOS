@@ -6,7 +6,7 @@
     cargo
     go
     zig
-    elixir
-    erlang
+    beamPackages.elixir
+    beamPackages.erlang
   ];
 }

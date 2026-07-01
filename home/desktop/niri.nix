@@ -301,10 +301,13 @@ in
       "Mod+Shift+Minus".action = set-window-height "-10%";
       "Mod+Shift+Equal".action = set-window-height "+10%";
 
-      # Lightshot-style region grab + annotate; built-ins keep window/screen.
+      # Print: select region → straight to clipboard + saved file (fast path).
+      # Shift+Print: select region → satty for Lightshot-style annotation.
+      # Ctrl+Print: whole screen. Mod+Print: the focused window (niri built-in).
       "Print".action = spawn "${config.home.profileDirectory}/bin/screenshot";
+      "Shift+Print".action = spawn "${config.home.profileDirectory}/bin/screenshot" "edit";
+      "Ctrl+Print".action = spawn "${config.home.profileDirectory}/bin/screenshot" "full";
       "Mod+Print".action.screenshot-window = {};
-      "Ctrl+Print".action.screenshot-screen = {};
 
       "XF86AudioRaiseVolume".action = spawn "swayosd-client" "--output-volume" "raise";
       "XF86AudioLowerVolume".action = spawn "swayosd-client" "--output-volume" "lower";

@@ -2,7 +2,7 @@
 let
   cfg = config.qfioofa.nvim;
 
-  pkgsNvim = inputs.nixpkgs-nvim.legacyPackages.${pkgs.system};
+  pkgsNvim = inputs.nixpkgs-nvim.legacyPackages.${pkgs.stdenv.hostPlatform.system};
   neovim-0_11_7 = pkgsNvim.neovim-unwrapped.overrideAttrs (old: rec {
     version = "0.11.7";
     src = pkgsNvim.fetchFromGitHub {

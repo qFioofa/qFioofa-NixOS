@@ -1,18 +1,33 @@
 { config, pkgs, lib, ... }:
 let
-  # Lightshot-style: select a region, annotate (arrow/text/rect/highlight/blur),
-  # then Enter copies to clipboard, Ctrl+S saves a PNG to ~/Pictures/Screenshots.
-  # Satty is the editor; grim+slurp do the region grab.
+  # Screenshots. Every mode saves a PNG to ~/Pictures/Screenshots AND puts it on
+  # the clipboard, then notifies. Modes:
+  #   (none) — select a region, copy it straight away (the fast Lightshot path)
+  #   edit   — select a region, open satty to annotate, then Enter/Ctrl+S copies
+  #   full   — whole screen
   screenshot = pkgs.writeShellScriptBin "screenshot" ''
-    export PATH="${lib.makeBinPath [ pkgs.grim pkgs.slurp pkgs.satty pkgs.wl-clipboard pkgs.coreutils ]}:$PATH"
+    export PATH="${lib.makeBinPath [ pkgs.grim pkgs.slurp pkgs.satty pkgs.wl-clipboard pkgs.libnotify pkgs.coreutils ]}:$PATH"
     dir="$HOME/Pictures/Screenshots"
     mkdir -p "$dir"
-    sel=$(slurp) || exit 0
-    grim -g "$sel" - | satty --filename - \
-      --output-filename "$dir/screenshot-$(date +%Y-%m-%d-%H-%M-%S).png" \
-      --copy-command wl-copy \
-      --early-exit \
-      --actions-on-enter save-to-clipboard exit
+    img="$dir/screenshot-$(date +%Y-%m-%d-%H-%M-%S).png"
+    case "''${1:-region}" in
+      edit)
+        sel=$(slurp) || exit 0
+        grim -g "$sel" - | satty --filename - --output-filename "$img" \
+          --copy-command wl-copy --early-exit --actions-on-enter save-to-clipboard exit
+        ;;
+      full)
+        grim "$img"
+        wl-copy < "$img"
+        notify-send -i "$img" "Screenshot" "Full screen — copied to clipboard"
+        ;;
+      *)
+        sel=$(slurp) || exit 0
+        grim -g "$sel" "$img"
+        wl-copy < "$img"
+        notify-send -i "$img" "Screenshot" "Region — copied to clipboard"
+        ;;
+    esac
   '';
 
   # Dump whatever image is in the clipboard to a real file so the file manager

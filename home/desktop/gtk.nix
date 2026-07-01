@@ -1,5 +1,9 @@
 { pkgs, ... }:
 {
+  # libadwaita / GTK4 apps (satty, gnome apps) ignore gtk-application-prefer-dark-theme
+  # and follow this gsettings key instead. Without it they render bright.
+  dconf.settings."org/gnome/desktop/interface".color-scheme = "prefer-dark";
+
   gtk = {
     enable = true;
     # Shared icon theme so GTK apps and the rofi launcher (icon-theme in
