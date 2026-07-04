@@ -5,8 +5,8 @@
     maven
     gradle
     jdt-language-server
+    spring-boot-cli
   ];
 
-  # JAVA_HOME so LSPs (jdt-language-server) and maven/gradle find the JDK.
   environment.sessionVariables.JAVA_HOME = "${pkgs.jdk21.home}";
 }

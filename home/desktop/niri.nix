@@ -1,7 +1,38 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 let
   theme = import ../../theme.nix;
   inherit (theme) bg bgSurface fgMuted;
+
+  # niri has no bulk "tile into row/column" action, so loop its per-window ops.
+  # ponytail: loops the native actions; niri gains a real bulk op → drop this.
+  niriArrange = pkgs.writeShellScriptBin "niri-arrange" ''
+    export PATH="${lib.makeBinPath [ pkgs.niri pkgs.jq ]}:$PATH"
+    set -euo pipefail
+    wins=$(niri msg -j windows)
+    f=$(jq -c '[.[] | select(.is_focused)][0]' <<<"$wins")
+    ws=$(jq '.workspace_id' <<<"$f")
+    case "''${1:-}" in
+      row)
+        # Expel every window in the focused column so they sit side by side.
+        col=$(jq '.layout.pos_in_scrolling_layout[0]' <<<"$f")
+        n=$(jq --argjson ws "$ws" --argjson col "$col" \
+          '[.[] | select(.workspace_id==$ws and .is_floating==false
+            and (.layout.pos_in_scrolling_layout // [0])[0]==$col)] | length' <<<"$wins")
+        for ((i = 1; i < n; i++)); do
+          niri msg action expel-window-from-column
+          niri msg action focus-column-left
+        done
+        ;;
+      column)
+        # Gather every tiled window on the workspace into one vertical stack.
+        n=$(jq --argjson ws "$ws" \
+          '[.[] | select(.workspace_id==$ws and .is_floating==false)] | length' <<<"$wins")
+        niri msg action move-column-to-first
+        for ((i = 1; i < n; i++)); do niri msg action consume-window-into-column; done
+        ;;
+      *) echo "usage: niri-arrange {row|column}" >&2; exit 1 ;;
+    esac
+  '';
 in
 {
   programs.niri.settings = {
@@ -296,6 +327,15 @@ in
       "Mod+BracketLeft".action = consume-window-into-column;
       "Mod+BracketRight".action = expel-window-from-column;
 
+      # Move a window sideways between adjacent columns (build a row by hand).
+      "Mod+Shift+BracketLeft".action = consume-or-expel-window-left;
+      "Mod+Shift+BracketRight".action = consume-or-expel-window-right;
+
+      # Bulk: stack all workspace windows into one column / spread the focused
+      # column back out into a row. Handles any number of windows at once.
+      "Mod+Backslash".action = spawn "niri-arrange" "column";
+      "Mod+Shift+Backslash".action = spawn "niri-arrange" "row";
+
       "Mod+Minus".action = set-column-width "-10%";
       "Mod+Equal".action = set-column-width "+10%";
       "Mod+Shift+Minus".action = set-window-height "-10%";
@@ -320,6 +360,8 @@ in
       "Mod+Shift+P".action = power-off-monitors;
     };
   };
+
+  home.packages = [ niriArrange ];
 
   # screenshot-path won't create missing parents, so ensure the dir exists.
   home.file."Pictures/Screenshots/.keep".text = "";

@@ -17,6 +17,7 @@
     ./users.nix
     ./docker.nix
     ./db.nix
+    ./pangolin-db.nix
     ./network-lab.nix
     ./languages
   ];

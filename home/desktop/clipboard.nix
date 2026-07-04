@@ -14,33 +14,42 @@ let
       edit)
         sel=$(slurp) || exit 0
         grim -g "$sel" - | satty --filename - --output-filename "$img" \
-          --copy-command wl-copy --early-exit --actions-on-enter save-to-clipboard exit
+          --copy-command "wl-copy --type image/png" --early-exit --actions-on-enter save-to-clipboard exit
         ;;
       full)
         grim "$img"
-        wl-copy < "$img"
+        wl-copy --type image/png < "$img"
         notify-send -i "$img" "Screenshot" "Full screen — copied to clipboard"
         ;;
       *)
         sel=$(slurp) || exit 0
         grim -g "$sel" "$img"
-        wl-copy < "$img"
+        wl-copy --type image/png < "$img"
         notify-send -i "$img" "Screenshot" "Region — copied to clipboard"
         ;;
     esac
   '';
 
   # Dump whatever image is in the clipboard to a real file so the file manager
-  # sees it — the Windows "paste into a folder" gesture, from the terminal.
-  # `paste-image` -> timestamped file in cwd; `paste-image foo.png` -> that name.
+  # sees it — the Windows "paste into a folder" gesture. Nemo (like most Linux
+  # file managers) can't paste raw clipboard image data itself; the Nemo action
+  # below calls this with %P (the open folder). Arg can be a dir (timestamped
+  # file inside it), a filename, or omitted (timestamped in cwd). notify-send so
+  # there's feedback when run from the file manager with no terminal attached.
   paste-image = pkgs.writeShellScriptBin "paste-image" ''
-    export PATH="${lib.makeBinPath [ pkgs.wl-clipboard pkgs.coreutils pkgs.gnugrep ]}:$PATH"
-    out="''${1:-pasted-$(date +%Y-%m-%d-%H-%M-%S).png}"
-    case "$out" in /*) ;; *) out="$PWD/$out" ;; esac
+    export PATH="${lib.makeBinPath [ pkgs.wl-clipboard pkgs.coreutils pkgs.gnugrep pkgs.libnotify ]}:$PATH"
+    arg="''${1:-$PWD}"
+    if [ -d "$arg" ]; then
+      out="$arg/pasted-$(date +%Y-%m-%d-%H-%M-%S).png"
+    else
+      case "$arg" in /*) out="$arg" ;; *) out="$PWD/$arg" ;; esac
+    fi
     if wl-paste --list-types | grep -q '^image/'; then
       wl-paste --type image/png > "$out"
+      notify-send -i "$out" "Clipboard" "Saved image to $out"
       echo "saved $out"
     else
+      notify-send "Clipboard" "No image in clipboard"
       echo "no image in clipboard" >&2
       exit 1
     fi
@@ -74,4 +83,16 @@ let
 in
 {
   home.packages = [ screenshot paste-image clipboard-menu pkgs.satty ];
+
+  # Right-click on empty space in Nemo → "Paste image from clipboard". %P is the
+  # currently open folder. Selection=none makes it a background-menu item.
+  xdg.dataFile."nemo/actions/paste-image.nemo_action".text = ''
+    [Nemo Action]
+    Name=Paste image from clipboard
+    Comment=Save the clipboard image into this folder
+    Exec=${config.home.profileDirectory}/bin/paste-image %P
+    Icon-Name=insert-image
+    Selection=none
+    Extensions=any;
+  '';
 }
