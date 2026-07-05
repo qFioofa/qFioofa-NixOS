@@ -44,8 +44,6 @@ in
     discord
     zoom-us
 
-    virtualbox
-
     gnomeSettings
     mission-center
   ];

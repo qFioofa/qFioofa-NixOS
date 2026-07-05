@@ -16,6 +16,7 @@
     ./huawei.nix
     ./users.nix
     ./docker.nix
+    ./virtualbox.nix
     ./db.nix
     ./pangolin-db.nix
     ./network-lab.nix
