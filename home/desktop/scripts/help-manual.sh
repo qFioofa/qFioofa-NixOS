@@ -32,8 +32,9 @@ row() {
   row "Mod + C"                 "Center column"
   row "Mod + [ / ]"             "Consume / expel window from column"
   row "Mod + Shift + [ / ]"     "Move window left / right between columns"
-  row "Mod + \\"                "Stack all windows into one column"
-  row "Mod + Shift + \\"        "Spread column back out into a row"
+  row "Mod + G"                "2/3 focused + 1/3 neighbour (task on the side)"
+  row "Mod + \\"                "Stack all windows vertically, equal height (fit top-to-bottom)"
+  row "Mod + Shift + \\"        "Spread column into an equal-width row (fit side by side)"
   row "Mod + - / ="             "Shrink / grow column width"
 
   head "󰍹   Workspaces & Monitors" "@violet@"

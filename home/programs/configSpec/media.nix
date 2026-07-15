@@ -7,6 +7,7 @@ in
   home.packages = with pkgs; [
     loupe    # images  (GNOME's Wayland-native viewer)
     evince   # PDFs / documents
+    marktext # Markdown — opens .md rendered (WYSIWYG), not as source
     # vlc for video/audio is already installed in apps.nix
   ];
 
@@ -23,6 +24,9 @@ in
       "audio/mpeg" "audio/flac" "audio/x-wav" "audio/ogg" "audio/mp4"
       "audio/aac" "audio/x-m4a"
     ] "vlc.desktop"
+    // forAll [
+      "text/markdown" "text/x-markdown"
+    ] "marktext.desktop"
     // {
       "application/pdf" = "org.gnome.Evince.desktop";
     };

@@ -22,6 +22,15 @@ let
           niri msg action expel-window-from-column
           niri msg action focus-column-left
         done
+        # Equalize the freshly-split columns so all n fit on screen side by side
+        # instead of overflowing the scroll. Focus is on the leftmost here.
+        if ((n > 1)); then
+          w=$((100 / n))
+          for ((i = 0; i < n; i++)); do
+            niri msg action set-column-width "''${w}%"
+            if ((i < n - 1)); then niri msg action focus-column-right; fi
+          done
+        fi
         ;;
       column)
         # Gather every tiled window on the workspace into one vertical stack.
@@ -29,8 +38,34 @@ let
           '[.[] | select(.workspace_id==$ws and .is_floating==false)] | length' <<<"$wins")
         niri msg action move-column-to-first
         for ((i = 1; i < n; i++)); do niri msg action consume-window-into-column; done
+        # Equalize heights so all n stack and fit top-to-bottom on screen,
+        # clearing any window that was manually resized before.
+        if ((n > 1)); then
+          h=$((100 / n))
+          for ((i = 1; i < n; i++)); do niri msg action focus-window-up; done
+          for ((i = 0; i < n; i++)); do
+            niri msg action set-window-height "''${h}%"
+            if ((i < n - 1)); then niri msg action focus-window-down; fi
+          done
+        fi
         ;;
-      *) echo "usage: niri-arrange {row|column}" >&2; exit 1 ;;
+      focus)
+        # 2/3 main + 1/3 reference: the focused column becomes the wide 2/3,
+        # its neighbour becomes the narrow 1/3. Stack more windows under the
+        # 1/3 with Mod+[ (consume-window-into-column); niri equalizes heights.
+        niri msg action set-column-width "66.667%"
+        col=$(jq '(.layout.pos_in_scrolling_layout // [0])[0]' <<<"$f")
+        maxcol=$(jq --argjson ws "$ws" \
+          '[.[] | select(.workspace_id==$ws and .is_floating==false)
+            | (.layout.pos_in_scrolling_layout // [0])[0]] | max' <<<"$wins")
+        if ((maxcol > 1)); then
+          if ((col < maxcol)); then dir=right; back=left; else dir=left; back=right; fi
+          niri msg action focus-column-"$dir"
+          niri msg action set-column-width "33.333%"
+          niri msg action focus-column-"$back"
+        fi
+        ;;
+      *) echo "usage: niri-arrange {row|column|focus}" >&2; exit 1 ;;
     esac
   '';
 in
@@ -76,7 +111,9 @@ in
 
     layout = {
       gaps = 12;
-      center-focused-column = "always";
+      # on-overflow (not always): a 2/3 + 1/3 pair fills the screen exactly, so
+      # both stay fully visible; centering only kicks in when a column overflows.
+      center-focused-column = "on-overflow";
       always-center-single-column = true;
 
       preset-column-widths = [
@@ -335,6 +372,9 @@ in
       # column back out into a row. Handles any number of windows at once.
       "Mod+Backslash".action = spawn "niri-arrange" "column";
       "Mod+Shift+Backslash".action = spawn "niri-arrange" "row";
+
+      # 2/3 focused + 1/3 neighbour — task on the side, work in the main pane.
+      "Mod+G".action = spawn "niri-arrange" "focus";
 
       "Mod+Minus".action = set-column-width "-10%";
       "Mod+Equal".action = set-column-width "+10%";
