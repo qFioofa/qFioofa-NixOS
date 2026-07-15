@@ -6,5 +6,7 @@
     gnumake
     cmakeCurses
     valgrind
+    spawn_fcgi
+    nginx
   ];
 }

@@ -81,6 +81,10 @@
     fastfetch          # system info display
 
     gcc                # C/C++ compiler
+    dotnet-sdk         # C# compiler / .NET SDK
+    kotlin             # Kotlin compiler
+    nodejs             # JavaScript runtime / compiler
+    typst              # markup-based typesetting compiler (tinymist LSP in nvim)
     gnumake            # make
     pkg-config         # build-time library metadata
     binutils           # objdump, nm, strings, ar, ld, readelf

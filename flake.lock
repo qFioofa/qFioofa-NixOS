@@ -25,11 +25,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1783222121,
-        "narHash": "sha256-E/ElL373TO8lQ2aMvYyzN+k4xkVaUGoRqoa8AtM71tI=",
+        "lastModified": 1783963347,
+        "narHash": "sha256-r376E2XpakiXwModDHIxlvB6qLq4iFVEq730vxOO4JY=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "a1645f40777620c4bd2b6d854b290c2fc354a266",
+        "rev": "a45a7c451455a51ae740ec3bce4024b312809c29",
         "type": "github"
       },
       "original": {
@@ -50,11 +50,11 @@
         "xwayland-satellite-unstable": "xwayland-satellite-unstable"
       },
       "locked": {
-        "lastModified": 1783267733,
-        "narHash": "sha256-DTvaM+0vanneOcKg3NKXV7ilf0ShY4BOBz/nde5GHos=",
+        "lastModified": 1784043058,
+        "narHash": "sha256-/LXa/IHpH6zqcxrfhtUaZOPZHfk0WXi5YUTICaslMCI=",
         "owner": "sodiboo",
         "repo": "niri-flake",
-        "rev": "74053f79cad0f6c3a4a0be6b7928795d2e6a9f4b",
+        "rev": "24728b7da2cde86eb119a771c16b214f0751f91e",
         "type": "github"
       },
       "original": {
@@ -83,11 +83,11 @@
     "niri-unstable": {
       "flake": false,
       "locked": {
-        "lastModified": 1783248941,
-        "narHash": "sha256-citgYJbvR1iUKXpiWlFq3NO+fw6hXGL3Qk1ampU7lhA=",
+        "lastModified": 1783522755,
+        "narHash": "sha256-dI0HkX1djETia7cD/Y64h8BNIsSOfTRMzfNum2J6UhE=",
         "owner": "YaLTeR",
         "repo": "niri",
-        "rev": "a30ca7983b2f1fc3ddeb209b3fe18fa78e0dbd25",
+        "rev": "0777769e719b7c9b7c980d4ea66288bfbb4da5b3",
         "type": "github"
       },
       "original": {
@@ -178,11 +178,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1783224372,
-        "narHash": "sha256-8i/87eeoqiGE4yOTjwSA3Eh/ziJRQEmd/unYU+K27sk=",
+        "lastModified": 1784007870,
+        "narHash": "sha256-djcLt/JJphyNt4eDY9XTly+/WbCK5lqWq9lSgCmJkkQ=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "d407951447dcd00442e97087bf374aad70c04cea",
+        "rev": "18b9261cb3294b6d2a06d03f96872827b8fe2698",
         "type": "github"
       },
       "original": {
@@ -214,11 +214,11 @@
         "nixpkgs-nvim": "nixpkgs-nvim_2"
       },
       "locked": {
-        "lastModified": 1783268225,
-        "narHash": "sha256-/OwKVKkrZSbjhJCexsPh13rCtZsY8bVAa7U1cVTbQfg=",
+        "lastModified": 1784060246,
+        "narHash": "sha256-w2UCYqbRAcX3eclsHvOXIROgJsBk+KBkXICMrfEHUnA=",
         "owner": "qFioofa",
         "repo": "qFioofa-Nvim",
-        "rev": "7e5793fdd4e35204078b97d3696e910ecf9dc1b3",
+        "rev": "3a7a19e2fd4552f4c9a32f72a454cd5ba60b6310",
         "type": "github"
       },
       "original": {
@@ -296,11 +296,11 @@
     },
     "wezterm-config": {
       "locked": {
-        "lastModified": 1783266807,
-        "narHash": "sha256-KKozTUEozeeLJNTaJhGkaE70zYMfwTs+tR3rjc7AWVQ=",
+        "lastModified": 1783854699,
+        "narHash": "sha256-iF2hsoT060oHBLNtHrlciMvPauYdJUvaiKLC/NDcKss=",
         "owner": "qFioofa",
         "repo": "qFioofa-wezterm",
-        "rev": "1a74382c6dd2343296fde995ea3b5271ee1f6f67",
+        "rev": "f471e299b6b5312842dded960ea2b018b2ee52a9",
         "type": "github"
       },
       "original": {
@@ -329,11 +329,11 @@
     "xwayland-satellite-unstable": {
       "flake": false,
       "locked": {
-        "lastModified": 1781226823,
-        "narHash": "sha256-28696iIw8uE0ZUyFTtzhEM8xMh85clCYypMxkvUi+sc=",
+        "lastModified": 1783895132,
+        "narHash": "sha256-Dl0Gvrig3EpE962hzF3ETPhUztlfuRhcmlpd8ioHN54=",
         "owner": "Supreeeme",
         "repo": "xwayland-satellite",
-        "rev": "8575d0ef55d70f9b4c46b6bffb3accf912217e1e",
+        "rev": "a2b5c635d8c8c99b286967658d0d177044887eb8",
         "type": "github"
       },
       "original": {
@@ -344,11 +344,11 @@
     },
     "zsh-config": {
       "locked": {
-        "lastModified": 1783266487,
-        "narHash": "sha256-FY2FaSTbxggkKaGklK5WcCPwshdFpIWIyk2cFtrBCgw=",
+        "lastModified": 1783855578,
+        "narHash": "sha256-TOGIEhXVDw+ivxOsAAU7vcwJMOj05V54RLpU2jX8XOA=",
         "owner": "qFioofa",
         "repo": "qFioofa-zsh",
-        "rev": "337f0de6285e3da036d598510117337b9abf56f5",
+        "rev": "92252b374c3571a68e415cd507ff2c91598e03ea",
         "type": "github"
       },
       "original": {

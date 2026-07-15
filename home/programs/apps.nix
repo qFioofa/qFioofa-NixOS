@@ -40,6 +40,8 @@ in
     rocketchat-desktop
     networkmanagerapplet
 
+    vscode
+
     gimp
     discord
     zoom-us

@@ -5,6 +5,7 @@ let
   # are wired up automatically for every shell and GUI app — no per-lib tweaks.
   cLibs = with pkgs; [
     check
+    fcgi        # libfcgi + fcgi_stdio.h
   ];
 
   # The `gcc` wrapper exposes gcc/g++/cpp but NOT `gcov`. `gcovr` (and lcov)
