@@ -41,6 +41,7 @@ in
     networkmanagerapplet
 
     vscode
+    postman
 
     gimp
     discord
