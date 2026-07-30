@@ -41,6 +41,7 @@ in
     networkmanagerapplet
 
     vscode
+    jetbrains.idea-community
     postman
 
     gimp
