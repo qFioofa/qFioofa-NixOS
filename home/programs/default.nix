@@ -8,5 +8,6 @@
     ./configSpec
     ./cli.nix
     ./ai.nix
+    ./plantuml.nix
   ];
 }
