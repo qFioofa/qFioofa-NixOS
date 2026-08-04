@@ -12,6 +12,7 @@
     ./bash.nix
     ./bluetooth.nix
     ./fingerprint.nix
+    ./security-key.nix
     ./nix-ld.nix
     ./huawei.nix
     ./users.nix

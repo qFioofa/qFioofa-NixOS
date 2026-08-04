@@ -9,5 +9,6 @@
     ./cli.nix
     ./ai.nix
     ./plantuml.nix
+    ./lite-xl.nix
   ];
 }
