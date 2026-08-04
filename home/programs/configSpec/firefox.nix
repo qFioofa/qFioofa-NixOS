@@ -1,6 +1,9 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 {
-  home.packages = with pkgs; [ firefox ];
+  home.packages = with pkgs; [
+    firefox
+    web-ext  # Пакет для управления расширениями Firefox
+  ];
 
   home.sessionVariables.BROWSER = "firefox";
 
