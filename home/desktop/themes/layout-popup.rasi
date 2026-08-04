@@ -1,0 +1,45 @@
+* {
+  bg:         @bg@;
+  bg-surface: @bgSurface@;
+  fg:         @fg@;
+  fg-dim:     @fgDim@;
+  fg-muted:   @fgMuted@;
+  accent:     @primary@;
+  background-color: transparent;
+  text-color:       @fg;
+}
+window {
+  width:         220px;
+  border:        @border@;
+  border-color:  @accent;
+  border-radius: @radius@;
+  background-color: @bg;
+  location: north west;
+  anchor:   north west;
+  x-offset: 8px;
+  y-offset: 48px;
+}
+mainbox {
+  padding: 12px;
+  spacing: 8px;
+  background-color: transparent;
+}
+inputbar { enabled: false; }
+listview {
+  lines:    4;
+  spacing:  4px;
+  scrollbar: false;
+  background-color: transparent;
+}
+element {
+  padding: 8px 12px;
+  spacing: 8px;
+  border-radius: @radiusInner@;
+  background-color: transparent;
+  text-color: @fg-dim;
+}
+element selected {
+  background-color: @bg-surface;
+  text-color: @accent;
+}
+element-text { text-color: inherit; vertical-align: 0.5; }

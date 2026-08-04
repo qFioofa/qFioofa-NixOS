@@ -1,0 +1,53 @@
+* {
+  bg:         @bg@;
+  bg-surface: @bgSurface@;
+  fg:         @fg@;
+  fg-dim:     @fgDim@;
+  fg-muted:   @fgMuted@;
+  accent:     @primary@;
+  background-color: transparent;
+  text-color:       @fg;
+  font: "JetBrainsMono Nerd Font 11";
+}
+window {
+  width:         620px;
+  border:        2px;
+  border-color:  @accent;
+  border-radius: 12px;
+  background-color: @bg;
+  location: center;
+}
+mainbox {
+  padding: 16px;
+  spacing: 10px;
+  background-color: transparent;
+}
+inputbar {
+  padding: 6px 12px;
+  border-radius: 8px;
+  background-color: @bg-surface;
+  children: [ prompt ];
+}
+prompt {
+  text-color: @accent;
+  font: "JetBrainsMono Nerd Font Bold 12";
+}
+listview {
+  lines:    24;
+  spacing:  2px;
+  scrollbar: false;
+  background-color: transparent;
+}
+element {
+  padding:       4px 12px;
+  border-radius: 6px;
+  background-color: transparent;
+}
+element selected {
+  background-color: @bg-surface;
+}
+element-text {
+  text-color: inherit;
+  vertical-align: 0.5;
+  highlight: none;
+}

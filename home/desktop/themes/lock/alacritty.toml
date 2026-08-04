@@ -1,0 +1,45 @@
+[window]
+decorations = "None"
+dynamic_padding = false
+opacity = 1.0
+padding.x = 28
+padding.y = 28
+
+[font]
+size = 13
+normal.family = "@font@"
+
+[colors.primary]
+background = "@bg@"
+foreground = "@fg@"
+
+# The 16-colour ANSI palette is mapped to the theme so every animation
+# (cmatrix green, lavat red, pipes' random colours, bonsai) renders in our
+# tokens instead of clashing defaults — and so the feedback pane can use
+# plain SGR codes (33 = primary, 31 = error, 90 = muted) and stay on-theme.
+[colors.normal]
+black   = "@bgSurface@"
+red     = "@error@"
+green   = "@success@"
+yellow  = "@primary@"
+blue    = "@tide@"
+magenta = "@violet@"
+cyan    = "@tide@"
+white   = "@fg@"
+
+[colors.bright]
+black   = "@fgMuted@"
+red     = "@coral@"
+green   = "@success@"
+yellow  = "@warning@"
+blue    = "@tide@"
+magenta = "@violet@"
+cyan    = "@tide@"
+white   = "@fg@"
+
+[cursor]
+style.shape = "Block"
+style.blinking = "Off"
+
+[mouse]
+hide_when_typing = true

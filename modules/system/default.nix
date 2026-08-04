@@ -1,0 +1,26 @@
+{ ... }:
+{
+  imports = [
+    ./boot.nix
+    ./plymouth.nix
+    ./locale.nix
+    ./networking.nix
+    ./amnezia.nix
+    #./zapret.nix
+    # ./tg-ws-proxy.nix
+    ./audio.nix
+    ./bash.nix
+    ./bluetooth.nix
+    ./fingerprint.nix
+    ./security-key.nix
+    ./nix-ld.nix
+    ./huawei.nix
+    ./users.nix
+    ./docker.nix
+    ./virtualbox.nix
+    ./db.nix
+    ./pangolin-db.nix
+    ./network-lab.nix
+    ./languages
+  ];
+}

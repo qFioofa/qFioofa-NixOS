@@ -1,0 +1,55 @@
+* {
+  bg:         @bg@;
+  bg-surface: @bgSurface@;
+  fg:         @fg@;
+  fg-dim:     @fgDim@;
+  fg-muted:   @fgMuted@;
+  accent:     @primary@;
+  background-color: transparent;
+  text-color:       @fg;
+}
+window {
+  width:         640px;
+  border:        @border@;
+  border-color:  @accent;
+  border-radius: @radius@;
+  background-color: @bg;
+  location: center;
+}
+mainbox {
+  padding: 12px;
+  spacing: 8px;
+  background-color: transparent;
+}
+inputbar {
+  spacing: 8px;
+  padding: 8px 12px;
+  border-radius: @radiusInner@;
+  background-color: @bg-surface;
+  children: [ prompt, entry ];
+}
+prompt { text-color: @accent; }
+entry {
+  placeholder: "Search windows...";
+  placeholder-color: @fg-muted;
+  text-color: @fg;
+}
+listview {
+  lines:    10;
+  spacing:  4px;
+  scrollbar: false;
+  background-color: transparent;
+}
+element {
+  padding: 8px 12px;
+  spacing: 10px;
+  border-radius: @radiusInner@;
+  background-color: transparent;
+  text-color: @fg-dim;
+}
+element selected {
+  background-color: @bg-surface;
+  text-color: @accent;
+}
+element-icon { size: 1.5em; vertical-align: 0.5; }
+element-text { text-color: inherit; vertical-align: 0.5; }

@@ -1,0 +1,65 @@
+* {
+  bg:         @bg@;
+  bg-surface: @bgSurface@;
+  fg:         @fg@;
+  fg-dim:     @fgDim@;
+  fg-muted:   @fgMuted@;
+  accent:     @primary@;
+  danger:     @error@;
+  background-color: transparent;
+  text-color:       @fg;
+}
+window {
+  width:         420px;
+  border:        2px;
+  border-color:  @accent;
+  border-radius: 12px;
+  background-color: @bg;
+  location: center;
+}
+mainbox {
+  padding: 14px;
+  spacing: 10px;
+  background-color: transparent;
+}
+inputbar {
+  padding: 8px 12px;
+  spacing: 8px;
+  border-radius: 8px;
+  background-color: @bg-surface;
+  text-color: @fg;
+  children: [ prompt, entry ];
+}
+prompt {
+  text-color: @accent;
+}
+message {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background-color: @bg-surface;
+  text-color: @fg;
+}
+textbox {
+  text-color: @fg;
+}
+listview {
+  lines:    8;
+  spacing:  4px;
+  scrollbar: false;
+  background-color: transparent;
+}
+element {
+  padding:       8px 12px;
+  spacing:       12px;
+  border-radius: 8px;
+  background-color: transparent;
+  text-color: @fg-dim;
+}
+element selected {
+  background-color: @bg-surface;
+  text-color: @accent;
+}
+element-text {
+  text-color: inherit;
+  vertical-align: 0.5;
+}
