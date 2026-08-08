@@ -64,8 +64,8 @@ in
       package = pkgs.gnome-themes-extra;
     };
     cursorTheme = {
-      name = "Adwaita";
-      package = pkgs.adwaita-icon-theme;
+      name = "Nordzy-catppuccin-latte-peach";
+      package = pkgs.nordzy-cursor-theme;
     };
     font = {
       name = "JetBrainsMono Nerd Font";

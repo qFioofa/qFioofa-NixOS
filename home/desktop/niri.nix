@@ -79,8 +79,8 @@ in
     };
 
     cursor = {
-      theme = "Adwaita";
-      size = 24;
+      theme = "Nordzy-catppuccin-latte-peach";
+      size = 30;
       hide-on-key-press = true;
     };
 

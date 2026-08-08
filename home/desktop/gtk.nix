@@ -12,6 +12,10 @@
       name = "Papirus-Dark";
       package = pkgs.papirus-icon-theme;
     };
+    cursorTheme = {
+      name = "Nordzy-catppuccin-latte-peach";
+      package = pkgs.nordzy-cursor-theme;
+    };
     # Render GTK apps (Nemo, etc.) dark to match the desktop instead of the
     # default light Adwaita.
     gtk3.extraConfig = {
