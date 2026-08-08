@@ -86,7 +86,7 @@ in
 
     input.keyboard.xkb = {
       layout = "us,ru";
-      options = "ctrl:nocaps,grp:lalt_lshift_toggle";
+      options = "ctrl:nocaps";
     };
     input.touchpad = {
       # tap-to-click: 1-finger = left, 2-finger = right, 3-finger = middle.
@@ -293,6 +293,9 @@ in
       # SIGUSR1 toggles waybar visibility.
       "Mod+B".action = spawn "${pkgs.procps}/bin/pkill" "--signal" "SIGUSR1" "waybar";
       "Mod+O".action = toggle-overview;
+      # Switch keyboard layout: Ctrl+Space -> next, Shift+Space -> prev.
+      "Ctrl+Space".action = switch-layout "next";
+      "Shift+Space".action = switch-layout "prev";
       "Mod+Slash".action = spawn "help-manual";
 
       "Mod+Left".action = focus-column-left;
