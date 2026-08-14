@@ -2,7 +2,13 @@
   description = "qFioofa NixOS — Niri + Amnezia VPN";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # Pinned to a specific revision: newer nixos-unstable removed
+    # `libdisplay-info_0_2`, which niri-flake still hard-requires (assert
+    # version == "0.2.0") until it catches up with libdisplay-info 0.3.
+    # Pinning the rev (not a branch) keeps `nix flake update` from dragging
+    # this forward and breaking the niri build. Bump only after niri-flake no
+    # longer needs libdisplay-info_0_2.
+    nixpkgs.url = "github:NixOS/nixpkgs/643809054d65fdd466a63e3155b8c498cb483c04";
 
     nixpkgs-nvim.url = "github:NixOS/nixpkgs/832efc09b4caf6b4569fbf9dc01bec3082a00611";
 

@@ -3,6 +3,7 @@
 {
   home.packages = with pkgs; [
     git
+    git-lfs
     act                # run github actions localy
     delta              # syntax-highlighting pager for git diff/blame
     difftastic         # structural, syntax-aware diff
