@@ -1,6 +1,5 @@
-{ pkgs, ... }:
+{ pkgs, theme, ... }:
 let
-  theme = import ../../theme.nix;
   inherit (theme) bg bgSurface fg fgDim fgMuted primary radius radiusInner border;
 
   rofi = "${pkgs.rofi}/bin/rofi";

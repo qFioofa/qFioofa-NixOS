@@ -1,6 +1,5 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, theme, ... }:
 let
-  theme = import ../../theme.nix;
   inherit (theme) bg bgSurface fg fgDim fgMuted primary radius radiusInner border font;
   mkL = value: { _type = "literal"; inherit value; };
   # Generates override .desktop entries with a Cyrillic key-position keyword so

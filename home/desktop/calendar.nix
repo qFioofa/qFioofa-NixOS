@@ -1,6 +1,5 @@
-{ pkgs, ... }:
+{ pkgs, theme, ... }:
 let
-  theme = import ../../theme.nix;
   inherit (theme)
     bg bgSurface fg fgDim fgMuted
     primary success warning error

@@ -1,7 +1,5 @@
-{ pkgs, ... }:
+{ pkgs, theme, ... }:
 let
-  theme = import ../../theme.nix;
-
   # Source NixOS snowflake logo (two two-tone lambdas, blue gradients).
   snowflakeSvg =
     "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";

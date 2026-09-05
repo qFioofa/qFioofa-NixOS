@@ -28,12 +28,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # DPI-bypass daemon (bol-van/zapret) packaged as a NixOS module.
-    # zapret = {
-    #   url = "github:aca/zapret-flake.nix";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
-
     # Local MTProto proxy that accelerates Telegram (Flowseal/tg-ws-proxy).
     tg-ws-proxy = {
       url = "github:pialtor/tg-ws-proxy-flake";
@@ -47,13 +41,23 @@
     tmux-config.url = "github:qFioofa/qFioofa-tmux";
   };
 
-  outputs = inputs@{ self, nixpkgs, home-manager, niri, ... }: {
+  outputs = inputs@{ self, nixpkgs, home-manager, niri, ... }:
+  let
+    # Single shared theme instance (palette, font, wallpaper, radii). Passed to
+    # both the NixOS system modules and home-manager user modules via
+    # specialArgs, so every consumer reads one evaluated copy instead of each
+    # re-importing theme.nix with a relative path.
+    theme = import ./theme.nix;
+    # Reusable home-manager feature modules shared across users (see
+    # hosts/root/default.nix). Exposed as a path so hosts need no brittle
+    # cross-directory relative imports.
+    homeConfigSpec = ./home/programs/configSpec;
+  in {
     nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
-      specialArgs = { inherit inputs; };
+      specialArgs = { inherit inputs theme homeConfigSpec; };
       modules = [
         niri.nixosModules.niri
-        # inputs.zapret.nixosModules.zapret
         home-manager.nixosModules.home-manager
         ./hosts/default/default.nix
       ];
@@ -61,10 +65,9 @@
 
     nixosConfigurations.qFioofa = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
-      specialArgs = { inherit inputs; };
+      specialArgs = { inherit inputs theme homeConfigSpec; };
       modules = [
         niri.nixosModules.niri
-        # inputs.zapret.nixosModules.zapret
         home-manager.nixosModules.home-manager
         ./hosts/qFioofa/default.nix
       ];

@@ -1,8 +1,6 @@
-{ config, pkgs, ... }:
+{ config, pkgs, theme, ... }:
 
 let
-  theme = import ../../theme.nix;
-
   plugins = builtins.fetchGit {
     url = "https://github.com/lite-xl/lite-xl-plugins";
     rev = "ba6bff1de455a65bf4f5a60f04e07ff390911937";

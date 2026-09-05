@@ -1,6 +1,5 @@
-{ pkgs, ... }:
+{ pkgs, theme, ... }:
 let
-  theme = import ../../theme.nix;
   inherit (theme) bg bgSurface fg fgMuted primary success warning error violet tide coral font;
   strip = c: builtins.substring 1 (builtins.stringLength c) c;
 

@@ -1,6 +1,5 @@
-{ pkgs, ... }:
+{ pkgs, theme, ... }:
 let
-  theme = import ../../theme.nix;
   inherit (theme) bg bgSurface fg fgDim fgMuted primary radius radiusInner border;
 
   # A centered rofi with the search bar enabled — type to filter open windows

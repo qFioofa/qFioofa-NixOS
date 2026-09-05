@@ -9,6 +9,9 @@
     difftastic         # structural, syntax-aware diff
     lazygit            # terminal UI for git
 
+    ijhttp             # call .http files
+
+    apacheHttpd        # loaded system testing
     coreutils          # ls, cat, cp, mv, head, tail, cut, sort, wc, ...
     gnused             # sed
     gawk               # awk

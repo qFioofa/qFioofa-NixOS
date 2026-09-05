@@ -1,7 +1,5 @@
-{ pkgs, inputs, ... }:
+{ pkgs, inputs, theme, ... }:
 let
-  theme = import ../../theme.nix;
-
   # regreet pinned to 0.3.0 from nixpkgs-regreet (see flake.nix). 0.4.0 is a
   # breaking release that crash-loops the greeter; keep this off the main
   # nixpkgs input so `nix flake update` can't bump it.

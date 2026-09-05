@@ -4,6 +4,7 @@
     jdk21
     maven
     gradle
+    sbt
     jdt-language-server
     spring-boot-cli
   ];

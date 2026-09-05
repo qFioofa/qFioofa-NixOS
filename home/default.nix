@@ -1,4 +1,6 @@
 { pkgs, ... }:
+# User home-manager config for the main user `qFioofa`. Bottom layer: the
+# desktop UI (compositor config, bar, popups, lock) and the installed programs.
 {
   imports = [
     ./desktop

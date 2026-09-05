@@ -1,6 +1,5 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, theme, ... }:
 let
-  theme = import ../../theme.nix;
   inherit (theme) bg bgSurface fgMuted;
 
   # niri has no bulk "tile into row/column" action, so loop its per-window ops.
@@ -404,8 +403,7 @@ in
     };
   };
 
-  home.packages = [ niriArrange ];
-
+  home.packages = [ niriArrange ];  # Only niriArrange is needed
   # screenshot-path won't create missing parents, so ensure the dir exists.
   home.file."Pictures/Screenshots/.keep".text = "";
 }

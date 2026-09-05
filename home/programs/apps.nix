@@ -41,6 +41,7 @@ in
     networkmanagerapplet
 
     vscode
+    zed-editor
     jetbrains.idea
     postman
 
