@@ -18,7 +18,7 @@ let
     runScript = "nvim";
     targetPkgs = p: with p; [
       neovim
-      stdenv.cc.cc zlib openssl ncurses icu
+      stdenv.cc.cc.lib zlib openssl ncurses icu
       nodejs python3 go jdk21
       gcc gnumake curl wget git unzip gzip gnutar ripgrep fd
     ];

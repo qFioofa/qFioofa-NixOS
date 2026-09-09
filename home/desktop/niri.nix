@@ -292,9 +292,8 @@ in
       # SIGUSR1 toggles waybar visibility.
       "Mod+B".action = spawn "${pkgs.procps}/bin/pkill" "--signal" "SIGUSR1" "waybar";
       "Mod+O".action = toggle-overview;
-      # Switch keyboard layout: Ctrl+Space -> next, Shift+Space -> prev.
+      # Switch keyboard layout: Ctrl+Space -> next.
       "Ctrl+Space".action = switch-layout "next";
-      "Shift+Space".action = switch-layout "prev";
       "Mod+Slash".action = spawn "help-manual";
 
       "Mod+Left".action = focus-column-left;
