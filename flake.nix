@@ -39,6 +39,7 @@
     zsh-config.url = "github:qFioofa/qFioofa-zsh";
     wezterm-config.url = "github:qFioofa/qFioofa-wezterm";
     tmux-config.url = "github:qFioofa/qFioofa-tmux";
+    lazygit-config.url = "github:qFioofa/qFioofa-LazyGit";
   };
 
   outputs = inputs@{ self, nixpkgs, home-manager, niri, ... }:

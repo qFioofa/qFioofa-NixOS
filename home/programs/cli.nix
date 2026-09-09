@@ -116,6 +116,7 @@
     shellcheck         # shell script linter
     shfmt              # shell script formatter
     docker
+    lazydocker            # terminal UI for docker
 
     playerctl          # media player control
     cava               # audio visualizer

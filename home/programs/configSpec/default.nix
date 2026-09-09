@@ -9,5 +9,6 @@
     ./tmux.nix
     ./wezterm.nix
     ./clangd.nix
+    ./lazygit.nix
   ];
 }

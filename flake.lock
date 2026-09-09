@@ -38,6 +38,21 @@
         "type": "github"
       }
     },
+    "lazygit-config": {
+      "locked": {
+        "lastModified": 1788965799,
+        "narHash": "sha256-WD1xNjtqaDuTHgLNPOTojfojr1jK3psulzj4gYnY9Yk=",
+        "owner": "qFioofa",
+        "repo": "qFioofa-LazyGit",
+        "rev": "4b6f2b89b0c325638ff660d9303bb6995bfb4cae",
+        "type": "github"
+      },
+      "original": {
+        "owner": "qFioofa",
+        "repo": "qFioofa-LazyGit",
+        "type": "github"
+      }
+    },
     "niri": {
       "inputs": {
         "niri-stable": "niri-stable",
@@ -231,6 +246,7 @@
       "inputs": {
         "ghostty-config": "ghostty-config",
         "home-manager": "home-manager",
+        "lazygit-config": "lazygit-config",
         "niri": "niri",
         "nixpkgs": "nixpkgs_2",
         "nixpkgs-nvim": "nixpkgs-nvim",
