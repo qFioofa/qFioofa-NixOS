@@ -8,9 +8,6 @@
     go
     zig
 
-    ruby
-    rubyPackages.railties
-
     beamPackages.elixir
     beamPackages.erlang
   ];

@@ -12,6 +12,7 @@ let
   startScript = pkgs.writeShellScript "tg-ws-proxy-start" (builtins.readFile (pkgs.replaceVars ./scripts/tg-ws-proxy-start.sh {
     openssl = "${pkgs.openssl}/bin/openssl";
     cat = "${pkgs.coreutils}/bin/cat";
+    printf = "${pkgs.coreutils}/bin/printf";
     proxy = "${proxy}/bin/tg-ws-proxy";
     inherit host;
     port = toString port;
@@ -36,6 +37,9 @@ in
       DynamicUser = true;
       StateDirectory = "tg-ws-proxy";
       StateDirectoryMode = "0700";
+
+      RuntimeDirectory = "tg-ws-proxy";
+      RuntimeDirectoryMode = "0755";
 
       # Hardening — it only needs loopback networking and its state dir.
       NoNewPrivileges = true;

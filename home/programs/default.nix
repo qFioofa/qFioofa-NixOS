@@ -12,5 +12,6 @@
     ./ai.nix
     ./plantuml.nix
     ./lite-xl.nix
+    ./tg-ws-proxy.nix
   ];
 }

@@ -19,5 +19,6 @@
     ./db.nix
     ./network-lab.nix
     ./languages
+    ./tg-ws-proxy.nix
   ];
 }
