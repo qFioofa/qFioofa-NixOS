@@ -20,5 +20,7 @@
     ./network-lab.nix
     ./languages
     ./tg-ws-proxy.nix
+    ./zapret.nix
+    ./cisco-vpn.nix
   ];
 }

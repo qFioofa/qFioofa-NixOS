@@ -15,6 +15,7 @@
     gns3-gui      # GNS3 desktop client
     gns3-server   # local compute the GUI spawns (needs to be on PATH)
     dynamips      # Cisco IOS emulator (the 3745 image runs on this)
+    iptables
   ];
 
   # ubridge connects emulated NICs to the host and powers link packet captures.

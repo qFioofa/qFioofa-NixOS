@@ -1,49 +1,45 @@
 { pkgs, config, ... }:
 let
-  # The package actually used by the service, so the fake-payload paths below
-  # always point at the same store path nfqws runs from.
   zapret = config.services.zapret.package;
   fake = "${zapret}/usr/share/zapret/files/fake";
 
-  # Pre-shipped, network-captured decoy packets. nfqws sends these as the
-  # "fake" desync payload so the DPI sees a legitimate-looking google.com
-  # handshake and lets the real (split/reordered) one through.
   fakeTls = "${fake}/tls_clienthello_www_google_com.bin";
   fakeQuic = "${fake}/quic_initial_www_google_com.bin";
+  fakeStun = "${fake}/stun.bin";
 
-  # Domains to desync. Scoped per-profile via --hostlist so nothing else on the
-  # machine is touched. nfqws auto-matches subdomains, so the apex is enough.
   hostlist = pkgs.writeText "zapret-hostlist" (pkgs.lib.fileContents ./data/zapret-hostlist.txt);
 in
 {
-  # DPI-bypass daemon, using nixpkgs' built-in module. Its iptables rules use
-  # --queue-bypass, so traffic flows normally if nfqws ever fails instead of the
-  # whole connection being blackholed (the failure mode of the old flake module).
+  # DPI-bypass service based on Flowseal/zapret-discord-youtube strategies,
+  # adapted for Linux via nixpkgs' built-in zapret module (nfqws + iptables NFQUEUE).
   #
-  # The previous config only desynced TCP 443 and YouTube still didn't load,
-  # because modern YouTube/Chrome speaks QUIC (HTTP/3 over UDP 443) — which the
-  # ISP throttles and the TCP-only bypass never saw. We now route UDP 443 too and
-  # run two nfqws strategy profiles (split with --new), following the approach in
-  # https://github.com/Sergeydigl3/zapret-discord-youtube-linux:
-  #   * QUIC (UDP 443): fake desync with a real google.com QUIC Initial decoy.
-  #   * TLS  (TCP 443): fake desync, ts fooling, real google.com ClientHello decoy.
-  # Each profile is scoped to ${hostlist} so only YouTube/Discord are affected.
+  # Strategy profiles (separated by --new):
+  #   0: QUIC (UDP 443)     — fake desync, repeats=6, google.com QUIC Initial decoy
+  #   1: Discord voice/STUN (UDP 19294-19344, 50000-50100) — fake desync, repeats=6
+  #   2: TLS (TCP 443)      — fake desync + ts fooling, repeats=6, google.com ClientHello
+  #   3: Alt HTTPS (TCP 2053,2083,2087,2096,8443) — multisplit seqovl=681 pos=1
+  #   4: TCP 80,443 general  — multisplit seqovl=568 pos=1, 4pda_to pattern
+  #   5: UDP 443 ipset fallback — fake, repeats=6
+  #   6: TCP 80,443,8443 ipset fallback — multisplit seqovl=568 pos=1
+  #   7: Game TCP fallback — multisplit, any-protocol, cutoff=n3
+  #   8: Game UDP fallback — fake, repeats=12, any-protocol, cutoff=n2
+  #
+  # Domains: Discord ecosystem, YouTube/Google, Cloudflare DoH/ECH/CDN
+  # (see modules/system/data/zapret-hostlist.txt)
   #
   # The desync method is ISP-specific. If a site stays blocked, run
-  # `nix-shell -p nftables zapret --command blockcheck` and adapt the params here.
+  # `nix-shell -p nftables zapret --command blockcheck` and adapt the params.
   services.zapret = {
     enable = true;
 
-    # QUIC needs UDP 443 routed into the NFQUEUE; without this nfqws never sees it.
     udpSupport = true;
-    udpPorts = [ "443" ];
-    # Port 80 is plain HTTP; YouTube/Discord are HTTPS-only, so skip it and keep
-    # the TLS profile's filter clean.
+    udpPorts = [
+      "443"
+      "19294:19344"
+      "50000:50100"
+    ];
     httpSupport = false;
 
-    # whitelist/blacklist are left empty on purpose: scoping is done per-profile
-    # with the inline --hostlist below, because the module appends its own
-    # --hostlist at the very end where it would only bind to the last profile.
     params = [
       # Profile 0 — QUIC (UDP 443)
       "--filter-udp=443"
@@ -52,25 +48,80 @@ in
       "--dpi-desync-repeats=6"
       "--dpi-desync-fake-quic=@${fakeQuic}"
       "--new"
-      # Profile 1 — TLS (TCP 443)
+
+      # Profile 1 — Discord voice / STUN (UDP 19294-19344, 50000-50100)
+      # NB: nfqws uses '-' for port ranges, unlike the iptables ':' in udpPorts
+      "--filter-udp=19294-19344,50000-50100"
+      "--dpi-desync=fake"
+      "--dpi-desync-fake-unknown-udp=@${fakeStun}"
+      "--dpi-desync-repeats=6"
+      "--new"
+
+      # Profile 2 — TLS (TCP 443)
       "--filter-tcp=443"
       "--hostlist=${hostlist}"
       "--dpi-desync=fake"
       "--dpi-desync-repeats=6"
       "--dpi-desync-fooling=ts"
       "--dpi-desync-fake-tls=@${fakeTls}"
+      "--new"
+
+      # Profile 3 — Alt HTTPS ports (discord.media and others)
+      "--filter-tcp=2053,2083,2087,2096,8443"
+      "--hostlist=${hostlist}"
+      "--dpi-desync=multisplit"
+      "--dpi-desync-split-seqovl=681"
+      "--dpi-desync-split-pos=1"
+      "--dpi-desync-split-seqovl-pattern=@${fakeTls}"
+      "--new"
+
+      # Profile 4 — General TCP (80,443) for hostlisted domains
+      "--filter-tcp=80,443"
+      "--hostlist=${hostlist}"
+      "--dpi-desync=multisplit"
+      "--dpi-desync-split-seqovl=568"
+      "--dpi-desync-split-pos=1"
+      "--dpi-desync-split-seqovl-pattern=@${fakeTls}"
+      "--new"
+
+      # Profile 5 — QUIC ipset fallback (UDP 443, no hostlist)
+      "--filter-udp=443"
+      "--dpi-desync=fake"
+      "--dpi-desync-repeats=6"
+      "--dpi-desync-fake-quic=@${fakeQuic}"
+      "--new"
+
+      # Profile 6 — TCP ipset fallback (80,443,8443, no hostlist)
+      "--filter-tcp=80,443,8443"
+      "--dpi-desync=multisplit"
+      "--dpi-desync-split-seqovl=568"
+      "--dpi-desync-split-pos=1"
+      "--dpi-desync-split-seqovl-pattern=@${fakeTls}"
+      "--new"
+
+      # Profile 7 — Game TCP fallback (any TCP above 1023) — range syntax uses '-'
+      "--filter-tcp=1024-65535"
+      "--dpi-desync=multisplit"
+      "--dpi-desync-any-protocol=1"
+      "--dpi-desync-cutoff=n3"
+      "--dpi-desync-split-seqovl=568"
+      "--dpi-desync-split-pos=1"
+      "--dpi-desync-split-seqovl-pattern=@${fakeTls}"
+      "--new"
+
+      # Profile 8 — Game UDP fallback (any UDP above 1023) — range syntax uses '-'
+      "--filter-udp=1024-65535"
+      "--dpi-desync=fake"
+      "--dpi-desync-repeats=12"
+      "--dpi-desync-any-protocol=1"
+      "--dpi-desync-fake-unknown-udp=@${fakeStun}"
+      "--dpi-desync-cutoff=n2"
     ];
   };
 
-  # The upstream nixpkgs zapret unit only orders `After=network.target`, with no
-  # relationship to firewall.service — yet firewall.service is what installs the
-  # `mangle POSTROUTING ... -j NFQUEUE --queue-num 200` redirect rules that feed
-  # nfqws. At boot the two race, so nfqws can bind the queue before (or instead
-  # of) the rules existing, and DPI bypass silently does nothing until something
-  # is restarted by hand. Wait for the firewall (and a real network) first, and
-  # tie nfqws's lifecycle to the firewall so it always rebinds after the rules
-  # are (re)applied. See https://github.com/bol-van/zapret/issues/333 and the
-  # NixOS firewall-ordering discussions.
+  # Race fix: nfqws must start after iptables NFQUEUE rules exist.
+  # Without this, nfqws can bind the queue before the rules are applied,
+  # and DPI bypass silently does nothing. See bol-van/zapret#333.
   systemd.services.zapret = {
     after = [ "network-online.target" "firewall.service" ];
     wants = [ "network-online.target" ];

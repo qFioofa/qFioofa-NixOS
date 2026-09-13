@@ -25,11 +25,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789012927,
-        "narHash": "sha256-+h1H0g2XMGXK0fNUlX4ajCmCz8u05IR7k0Cj2MJviBY=",
+        "lastModified": 1789273010,
+        "narHash": "sha256-E7dWx+utzZPpqQsBUd5sMimKTWMEEbTKFD+ya99Shps=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "df044b78fd9ec60d0e54752169666e6e1d393798",
+        "rev": "fdc36b12804b0179b24a5ffd282e4c95c37072e2",
         "type": "github"
       },
       "original": {
@@ -229,11 +229,11 @@
         "nixpkgs-nvim": "nixpkgs-nvim_2"
       },
       "locked": {
-        "lastModified": 1788960241,
-        "narHash": "sha256-PF651vDJi+m9xdKzjB4e/nPQo4XqrI0/XVU39LVgc4Q=",
+        "lastModified": 1789192716,
+        "narHash": "sha256-IaFPx92/xikCEt6IsINwzL+zMtt7aajyhB0xg8sfZLg=",
         "owner": "qFioofa",
         "repo": "qFioofa-Nvim",
-        "rev": "e85449b14d3c2f7b2a51a6c36d05e084e4300b3c",
+        "rev": "b0f55ac4bcf6b4634c253dd12b8618bf4336ecf1",
         "type": "github"
       },
       "original": {
@@ -360,11 +360,11 @@
     },
     "zsh-config": {
       "locked": {
-        "lastModified": 1786541858,
-        "narHash": "sha256-iNzeMYQEAmx5uIaFrRaHkrM1d1K6wSq0ygHW+8XSBaY=",
+        "lastModified": 1789050079,
+        "narHash": "sha256-9/aLhjZTSLTDQBwh6JHM1oHmSxBdY1pcNSgLV+Ifd18=",
         "owner": "qFioofa",
         "repo": "qFioofa-zsh",
-        "rev": "c51b318be51141eb796c177f89384072dee6ba2e",
+        "rev": "eecf4b22fa27626ca4758b809074f5d256d0e1f1",
         "type": "github"
       },
       "original": {

@@ -1,7 +1,7 @@
 { pkgs, ... }:
 # Auto-configure Telegram Desktop to use the local MTProto proxy on login.
 # The system service (modules/system/tg-ws-proxy.nix) writes the secret to
-# /run/tg-ws-proxy-secret; this user service reads it and opens the
+# /run/tg-ws-proxy/secret; this user service reads it and opens the
 # tg://proxy protocol link so Telegram adds the proxy automatically.
 {
   systemd.user.services.tg-ws-proxy-setup = {
@@ -38,9 +38,17 @@
         sleep 3
 
         # Open the protocol link — Telegram Desktop registers tg:// in XDG.
-        ${pkgs.xdg-utils}/bin/xdg-open "$link" || \
-        ${pkgs.glib}/bin/gio open "$link" || \
-        echo "tg-ws-proxy: could not open $link" >&2
+        # Run it detached and return immediately: xdg-open blocks until the
+        # launched app exits, and on a fresh login Telegram is not running yet
+        # (so xdg-open spawns it itself and never returns). A blocking open
+        # leaves this oneshot stuck in 'activating' forever, and every switch
+        # then SIGTERMs the stale instance and re-starts the unit.
+        (
+          ${pkgs.xdg-utils}/bin/xdg-open "$link" >/dev/null 2>&1 \
+            || ${pkgs.glib}/bin/gio open "$link" >/dev/null 2>&1 \
+            || echo "tg-ws-proxy: could not open $link" >&2
+        ) &
+        exit 0
       '';
     };
 

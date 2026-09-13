@@ -1,9 +1,21 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 {
 
   services.swayosd = {
     enable = true;
     stylePath = ./themes/swayosd-style.css;
+  };
+
+  # swayosd's generated unit races niri's startup: it is WantedBy
+  # graphical-session.target with ConditionEnvironment=WAYLAND_DISPLAY, but at
+  # that point niri has not yet exported the display to the user manager, so
+  # the condition fails and the OSD server is skipped ("start condition unmet")
+  # — leaving the volume/brightness binds with no server to act on. niri now
+  # spawns swayosd-server itself (see desktop/niri.nix), so stop the unit from
+  # being pulled in at all.
+  systemd.user.services.swayosd = {
+    Unit.ConditionEnvironment = lib.mkForce [ ];
+    Install.WantedBy = lib.mkForce [ ];
   };
 
   services.kanshi = {

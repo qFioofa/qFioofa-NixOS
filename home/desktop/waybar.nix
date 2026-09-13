@@ -1,4 +1,4 @@
-{ pkgs, theme, ... }:
+{ pkgs, config, theme, ... }:
 let
   inherit (theme)
     bg bgSurface fg fgDim fgMuted
@@ -297,9 +297,9 @@ in
         format-icons = {
           default = [ "󰕿" "󰖀" "󰕾" ];
         };
-        on-scroll-up = "swayosd-client --output-volume raise";
-        on-scroll-down = "swayosd-client --output-volume lower";
-        on-click = "swayosd-client --output-volume mute-toggle";
+        on-scroll-up = "${config.services.swayosd.package}/bin/swayosd-client --output-volume raise";
+        on-scroll-down = "${config.services.swayosd.package}/bin/swayosd-client --output-volume lower";
+        on-click = "${config.services.swayosd.package}/bin/swayosd-client --output-volume mute-toggle";
         on-click-right = "pavucontrol";
       };
 
@@ -312,8 +312,8 @@ in
       backlight = {
         format = "󰃠  {percent}%";
         tooltip-format = "Brightness: {percent}%";
-        on-scroll-up = "swayosd-client --brightness raise";
-        on-scroll-down = "swayosd-client --brightness lower";
+        on-scroll-up = "${config.services.swayosd.package}/bin/swayosd-client --brightness raise";
+        on-scroll-down = "${config.services.swayosd.package}/bin/swayosd-client --brightness lower";
       };
 
       "backlight/slider" = {

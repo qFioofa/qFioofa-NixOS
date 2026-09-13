@@ -253,6 +253,12 @@ in
 
     spawn-at-startup = [
       { command = [ "waybar" ]; }
+      # swayosd-server is the OSD backend for the XF86Audio*/XF86MonBrightness*
+      # binds below. Started here (not via its home-manager systemd unit), in
+      # the same session as waybar/swaybg, so WAYLAND_DISPLAY is guaranteed to
+      # exist — the unit's ConditionEnvironment runs before niri exports the
+      # display to the user manager and gets skipped forever.
+      { command = [ "${config.services.swayosd.package}/bin/swayosd-server" "--style" "${config.services.swayosd.stylePath}" ]; }
       { command = [ "${pkgs.swaybg}/bin/swaybg" "-i" "${theme.wallpaper}" "-m" "fill" ]; }
       # Polkit authentication agent for GUI auth prompts (the other user
       # services already run via systemd).
@@ -390,12 +396,12 @@ in
       "Ctrl+Print".action = spawn "${config.home.profileDirectory}/bin/screenshot" "full";
       "Mod+Print".action.screenshot-window = {};
 
-      "XF86AudioRaiseVolume".action = spawn "swayosd-client" "--output-volume" "raise";
-      "XF86AudioLowerVolume".action = spawn "swayosd-client" "--output-volume" "lower";
-      "XF86AudioMute".action = spawn "swayosd-client" "--output-volume" "mute-toggle";
-      "XF86AudioMicMute".action = spawn "swayosd-client" "--input-volume" "mute-toggle";
-      "XF86MonBrightnessUp".action = spawn "swayosd-client" "--brightness" "raise";
-      "XF86MonBrightnessDown".action = spawn "swayosd-client" "--brightness" "lower";
+      "XF86AudioRaiseVolume".action = spawn "${config.services.swayosd.package}/bin/swayosd-client" "--output-volume" "raise";
+      "XF86AudioLowerVolume".action = spawn "${config.services.swayosd.package}/bin/swayosd-client" "--output-volume" "lower";
+      "XF86AudioMute".action = spawn "${config.services.swayosd.package}/bin/swayosd-client" "--output-volume" "mute-toggle";
+      "XF86AudioMicMute".action = spawn "${config.services.swayosd.package}/bin/swayosd-client" "--input-volume" "mute-toggle";
+      "XF86MonBrightnessUp".action = spawn "${config.services.swayosd.package}/bin/swayosd-client" "--brightness" "raise";
+      "XF86MonBrightnessDown".action = spawn "${config.services.swayosd.package}/bin/swayosd-client" "--brightness" "lower";
 
       "Mod+Shift+E".action = quit;
       "Mod+Shift+P".action = power-off-monitors;

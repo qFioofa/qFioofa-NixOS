@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 let
   # Console password feedback for the lock screen (see home/desktop/lock.nix).
   # swaylock-plugin owns the keyboard grab, so the lock's tmux panes can never
@@ -17,6 +17,14 @@ let
 in
 {
   programs.niri.enable = true;
+
+  # niri-flake enables its own KDE polkit agent (systemd.user.services.niri-flake-polkit),
+  # but only ONE agent can register per session ("An authentication agent already
+  # exists for the given subject"). Ours is the polkit-gnome one already spawned in
+  # niri's spawn-at-startup (home/desktop/niri.nix), so the KDE agent exits 1 and —
+  # with its built-in Restart=on-failure — restart-loops up to the start limit on
+  # every session. Stop pulling it in; the gnome agent covers auth prompts.
+  systemd.user.services."niri-flake-polkit".wantedBy = lib.mkForce [ ];
 
   xdg.portal = {
     enable = true;

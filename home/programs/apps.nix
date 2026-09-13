@@ -43,7 +43,10 @@ in
     vscode
     zed-editor
     jetbrains.idea
+    jetbrains.ruby-mine
     postman
+
+    remmina
 
     gimp
     discord
