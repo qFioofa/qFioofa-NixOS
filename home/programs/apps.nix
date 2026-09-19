@@ -49,11 +49,14 @@ in
     remmina
 
     gimp
+    obs-studio
     discord
     zoom-us
 
     gnomeSettings
     mission-center
+
+    oath-toolkit
   ];
 
   dconf.settings = {

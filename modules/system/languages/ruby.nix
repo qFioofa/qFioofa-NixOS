@@ -34,6 +34,7 @@ in {
     rubyPackages_4_0.rspec
     rubyPackages_4_0.yard
 
+    foreman
     patchelf
     pkg-config
     zlib
