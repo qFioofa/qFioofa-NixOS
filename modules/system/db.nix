@@ -21,4 +21,26 @@
       host    all       all   ::1/128       scram-sha-256
     '';
   };
+
+  services.mysql = {
+    enable = true;
+    package = pkgs.mariadb;
+
+    ensureDatabases = [ "qFioofa" ];
+    ensureUsers = [
+      {
+        name = "qFioofa";
+        ensurePermissions = {
+          "qFioofa.*" = "ALL PRIVILEGES";
+        };
+      }
+    ];
+
+    settings = {
+      mysqld = {
+        bind-address = "127.0.0.1";
+        skip-networking = false;
+      };
+    };
+  };
 }
