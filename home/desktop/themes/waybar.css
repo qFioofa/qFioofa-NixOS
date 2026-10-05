@@ -23,6 +23,7 @@ tooltip {
 #center-a,
 #center-b,
 #right-a,
+#right-sys,
 #right-b {
   background: rgba(21, 21, 21, 0.92);
   border: 1px solid @bgSurface@;
@@ -35,6 +36,7 @@ tooltip {
 #left-c { margin-right: 6px; }
 #center-a { margin-right: 6px; }
 #right-a { margin-right: 6px; }
+#right-sys { margin-right: 6px; }
 
 /* Collapse the tray / taskbar capsules when they are empty. */
 #center-a.empty,
@@ -186,7 +188,9 @@ tooltip {
 #pulseaudio,
 #backlight,
 #idle_inhibitor,
-#custom-player {
+#custom-player,
+#cpu,
+#memory {
   padding: 0 10px;
   /* Fade between state colours (connect/disconnect, charge, mute…)
      instead of snapping. */
@@ -263,3 +267,16 @@ tooltip {
   min-height: 12px;
   margin: -4px 0;
 }
+
+/* System load: CPU and memory. Divider separates the two. */
+#cpu { color: @primary@; }
+#cpu.warning { color: @warning@; }
+#cpu.critical { color: @error@; }
+
+#memory {
+  margin: 6px 0;
+  border-left: 1px solid @bgSurface@;
+  color: @violet@;
+}
+#memory.warning { color: @warning@; }
+#memory.critical { color: @error@; }

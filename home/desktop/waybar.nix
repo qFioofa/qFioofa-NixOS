@@ -85,7 +85,7 @@ in
 
       modules-left = [ "group/left-a" "group/left-b" "group/left-c" ];
       modules-center = [ "group/center-a" "group/center-b" ];
-      modules-right = [ "group/right-a" "group/right-b" ];
+      modules-right = [ "group/right-a" "group/right-sys" "group/right-b" ];
 
       "group/left-a" = {
         orientation = "horizontal";
@@ -136,6 +136,11 @@ in
           children-class = "drawer-child";
         };
         modules = [ "backlight" "backlight/slider" ];
+      };
+      # System load capsule: CPU + memory, click opens btop in a terminal.
+      "group/right-sys" = {
+        orientation = "horizontal";
+        modules = [ "cpu" "memory" ];
       };
       # Status + system capsule.
       "group/right-b" = {
@@ -253,6 +258,27 @@ in
         };
         tooltip-format-activated = "Idle inhibitor: on";
         tooltip-format-deactivated = "Idle inhibitor: off";
+      };
+
+      cpu = {
+        interval = 2;
+        format = "󰻠  {usage}%";
+        states = {
+          warning = 60;
+          critical = 85;
+        };
+        on-click = "ghostty -e btop";
+      };
+
+      memory = {
+        interval = 5;
+        format = "󰍛  {percentage}%";
+        tooltip-format = "{used:0.1f} GiB / {total:0.1f} GiB";
+        states = {
+          warning = 70;
+          critical = 90;
+        };
+        on-click = "ghostty -e btop";
       };
 
       network = {
