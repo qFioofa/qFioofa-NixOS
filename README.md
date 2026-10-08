@@ -10,13 +10,15 @@ A simple, stable NixOS configuration built around the **niri** Wayland composito
 ## Layout
 
 ```
-flake.nix                  inputs + nixosConfigurations."nixos"
-hosts/default/
+flake.nix                  inputs + nixosConfigurations.{nixos,qFioofa,wsl}
+hosts/<name>/
   default.nix              the host: imports everything, hostName, stateVersion, HM wiring
   hardware.nix             machine-specific (REPLACE before deploying — see below)
 modules/system/            OS-level: boot, locale, networking, audio, users
 modules/desktop/           niri enable + portals, greetd login, fonts
+modules/wsl/               headless OS subset for the WSL2 host
 home/                      user dotfiles: niri settings, waybar, foot, fuzzel, mako
+home/wsl.nix               headless user profile (terminal/dev only)
 scripts/deploy.sh          convenience wrapper around nixos-rebuild
 ```
 
@@ -49,5 +51,29 @@ System-wide / needs root → `modules/`. Per-user dotfiles → `home/`.
 | `Mod+F` / `Mod+Shift+F` | maximize / fullscreen |
 | `Print` | screenshot |
 | `Mod+Shift+E` | quit niri |
+
+## WSL (headless) profile
+
+`nixosConfigurations.wsl` runs the same flake as a WSL2 distro on Windows. It is
+deliberately headless: no niri, greetd, waybar or GUI apps — only the OS subset
+that makes sense under WSL and a terminal/dev home profile.
+
+- System: `modules/wsl/` imports locale, `nix-ld`, `envfs`, zsh/user tooling, the
+  language toolchains and Docker; it drops boot/plymouth/audio/bluetooth/
+  fingerprint/virtualbox/amnezia/zapret/cisco-vpn and all of `modules/desktop/`.
+  Networking uses WSL's own stack (NetworkManager is **not** enabled).
+- User: `home/wsl.nix` pulls the terminal feature set (`configSpec/terminal.nix`:
+  zsh, nvim, tmux, lazygit, clangd), the CLI toolbox and the AI/data-science
+  packages. GUI modules (`configSpec/gui.nix`), `home/desktop/` and `apps.nix`
+  are excluded.
+- User `qFioofa` has passwordless `sudo` (same password hash as the desktop hosts).
+
+Install NixOS-WSL on Windows, then from inside the distro:
+
+```sh
+git clone <this repo> ~/nixos && cd ~/nixos
+sudo nixos-rebuild switch --flake .#wsl
+# or: ./scripts/deploy.sh wsl
+```
 
 See `home/niri.nix` for the full list and to customize.

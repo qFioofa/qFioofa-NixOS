@@ -28,6 +28,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # NixOS-WSL: boots the same flake as a WSL2 distro on Windows. Only the
+    # `wsl` host/configuration consumes this; the desktop hosts ignore it.
+    nixos-wsl = {
+      url = "github:nix-community/NixOS-WSL/main";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Local MTProto proxy that accelerates Telegram (Flowseal/tg-ws-proxy).
     tg-ws-proxy = {
       url = "github:pialtor/tg-ws-proxy-flake";
@@ -42,7 +49,7 @@
     lazygit-config.url = "github:qFioofa/qFioofa-LazyGit";
   };
 
-  outputs = inputs@{ self, nixpkgs, home-manager, niri, ... }:
+  outputs = inputs@{ self, nixpkgs, home-manager, niri, nixos-wsl, ... }:
   let
     # Single shared theme instance (palette, font, wallpaper, radii). Passed to
     # both the NixOS system modules and home-manager user modules via
@@ -71,6 +78,18 @@
         niri.nixosModules.niri
         home-manager.nixosModules.home-manager
         ./hosts/qFioofa/default.nix
+      ];
+    };
+
+    # Headless WSL2 host: no niri/greetd/desktop stack, just the OS subset that
+    # makes sense under WSL plus a terminal/dev home-manager profile.
+    nixosConfigurations.wsl = nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
+      specialArgs = { inherit inputs theme homeConfigSpec; };
+      modules = [
+        nixos-wsl.nixosModules.default
+        home-manager.nixosModules.home-manager
+        ./hosts/wsl/default.nix
       ];
     };
   };
