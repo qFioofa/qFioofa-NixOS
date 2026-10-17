@@ -41,6 +41,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Herdr — terminal workspace manager for AI coding agents. Official Nix
+    # support is a flake that builds from source; pinned to a release tag so
+    # `nix flake update` can't drag it forward. nixpkgs follows the pinned
+    # revision above to avoid a second copy in the closure.
+    herdr = {
+      url = "github:herdrdev/herdr/v0.9.3";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nvim-config.url = "github:qFioofa/qFioofa-Nvim";
     ghostty-config.url = "github:qFioofa/qFioofa-Ghostty";
     zsh-config.url = "github:qFioofa/qFioofa-zsh";

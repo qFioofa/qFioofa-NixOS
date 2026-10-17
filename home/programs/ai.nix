@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
 
 let
   omniroute = pkgs.writeShellScriptBin "omniroute" ''
@@ -8,6 +8,7 @@ in
 {
   home.packages = with pkgs; [
     claude-code
+    inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default
     omniroute
     opencode
   ];

@@ -4,11 +4,11 @@
 item() { printf '<span color="%s" weight="bold">%s</span>   %s\n' "$1" "$2" "$3"; }
 
 chosen=$( { \
-  item "@tide@"    "󰍁" "Lock"; \
-  item "@amber@"   "󰍃" "Logout"; \
-  item "@violet@"  "󰒲" "Suspend"; \
-  item "@warning@" "󰜉" "Reboot"; \
   item "@error@"   "󰐥" "Shutdown"; \
+  item "@violet@"  "󰒲" "Suspend"; \
+  item "@tide@"    "󰍁" "Lock"; \
+  item "@warning@" "󰜉" "Reboot"; \
+  item "@amber@"   "󰍃" "Logout"; \
   } | @rofi@ -dmenu -i -markup-rows -p "Power" \
       -theme @menuTheme@ \
       -no-custom -format s)
