@@ -1,7 +1,14 @@
-{ ... }:
+{ lib, ... }:
 {
   networking.networkmanager.enable = true;
   networking.firewall.enable = false;
+
+  # Start the dispatcher from boot instead of leaving it purely D-Bus-activated,
+  # so /etc/NetworkManager/dispatcher.d hooks are live from early boot.
+  systemd.services.NetworkManager-dispatcher = {
+    enable = true;
+    wantedBy = lib.mkForce [ "multi-user.target" ];
+  };
 
   networking.extraHosts = ''
     127.0.0.1 store.local

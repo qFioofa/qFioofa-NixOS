@@ -50,6 +50,12 @@
 
   services.network-manager-applet.enable = true;
 
+  # KDE Connect daemon plus tray indicator (waybar "tray" module picks it up).
+  services.kdeconnect = {
+    enable = true;
+    indicator = true;
+  };
+
   # Keep blueman-manager available for the waybar bluetooth module, but stop the
   # tray applet from auto-starting. A user-level Hidden autostart entry overrides
   # the system blueman.desktop, so systemd's xdg-autostart generator skips it
