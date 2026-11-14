@@ -12,6 +12,13 @@
 
     nixpkgs-nvim.url = "github:NixOS/nixpkgs/832efc09b4caf6b4569fbf9dc01bec3082a00611";
 
+    # Exact Ruby versions built from ruby-build sources. nixpkgs dropped
+    # ruby_3_1 (EOL), and its last snapshot only had 3.1.6, so the
+    # control-objects project's pinned 3.1.2 comes from here. Exposed as the
+    # `ruby312` wrapper in modules/system/languages/ruby.nix; the system
+    # `ruby` stays at 4.0.6.
+    nixpkgs-ruby.url = "github:bobvanderlinden/nixpkgs-ruby";
+
     # Pinned so `nix flake update` can't drag regreet to 0.4.0, which breaks the
     # greetd/regreet login (greeter exits, greetd crash-loops). This commit has
     # the known-good regreet 0.3.0. Bump only after login.nix is made

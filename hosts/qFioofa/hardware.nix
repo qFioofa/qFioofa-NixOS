@@ -31,9 +31,21 @@
   # (`sof-essx8336 ... deferred probe pending`) and registers NO card at all —
   # the silent "Dummy Output", which also suppresses the working Conexant codec.
   # So use legacy HDA: snd-hda-intel binds the Conexant directly and gives a real
-  # card with speakers + headphone + headset mic. Tradeoff: the internal digital
-  # mic (DMIC) is only reachable via the dead ES8336/SOF path, so it stays dead;
-  # the headset-jack mic works. (To revisit the DMIC you'd need I2C2 re-enabled
-  # in firmware — a Huawei BIOS update / FSP UPD SerialIoI2cEnable[2].)
+  # card with speakers + headphone + analog mic. The Ubuntu BOD-WXX9 workaround
+  # (hda-verb, enabled through micFix below) is what actually un-mutes/biases
+  # that capture path; without it the card exists but records silence.
   hardware.huawei.matebook.audioDriver = "hda";
+  hardware.huawei.matebook.micFix = true;
+
+  # Internal DMIC instead of the analog/headset mic: the DMIC is only reachable
+  # through the Intel DSP, and SOF cannot use it here because the ES8336/I2C2
+  # link is dead. AVS does not need that link. It does need the Huawei
+  # dsp_fw_release.bin (not shipped in linux-firmware); extract it from
+  # HUAWEI_Matebook_D_15_2022_ISST_*.zip (Fw/dsp_fw_release.bin), then replace
+  # the two lines above with:
+  #   hardware.huawei.matebook.audioDriver = "avs";
+  #   hardware.huawei.matebook.avsFirmware = ./firmware/dsp_fw_release.bin;
+  # (a git-tracked path inside the flake works with pure evaluation; for an
+  # external absolute path rebuild with `--impure`).
+  # Known good on BOD-WXX9-PCB-B3; B4/B5 are untested with AVS.
 }

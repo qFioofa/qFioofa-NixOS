@@ -2,6 +2,8 @@
 { pkgs, ... }:
 {
   home.packages = with pkgs; [
+    sshpass
+
     git
     git-lfs
     act                # run github actions localy
@@ -116,6 +118,7 @@
     shellcheck         # shell script linter
     shfmt              # shell script formatter
     docker
+    k9s
     lazydocker            # terminal UI for docker
 
     playerctl          # media player control

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 DATE=@date@
-CAL=@cal@
 ROFI="@rofi@ -theme @calTheme@"
+WLCOPY=@wlcopy@
+NOTIFY=@notify@
 
 esc() { printf '%s' "$1" | @sed@ 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g'; }
 
@@ -12,47 +13,22 @@ info() {
 }
 
 ask() {
-  : | $ROFI -dmenu -p "$1" -mesg "${2:-Accepts YYYY-MM-DD or natural language (e.g. \"next friday\").}" -lines 0
+  local prompt="$1" mesg="${2:-Accepts YYYY-MM-DD or natural language (e.g. \"next friday\").}" default="${3:-}"
+  if [ -n "$default" ]; then
+    : | $ROFI -dmenu -p "$prompt" -mesg "$mesg" -lines 0 -filter "$default"
+  else
+    : | $ROFI -dmenu -p "$prompt" -mesg "$mesg" -lines 0
+  fi
 }
 
 to_epoch() { $DATE -d "$1" +%s 2>/dev/null; }
-
-show_calendar() {
-  local off=${1:-0}
-  while :; do
-    local first ym mon yr body chosen
-    first=$($DATE -d "$($DATE +%Y-%m-01) +$off month" +%Y-%m-01)
-    ym=$($DATE -d "$first" "+%B %Y")
-    mon=$($DATE -d "$first" +%-m); yr=$($DATE -d "$first" +%Y)
-    # cal -m → Monday is the first column; positional month/year selects it.
-    body=$($CAL -m "$mon" "$yr")
-    # Mark today with a guillemet when we are looking at the current month.
-    if [ "$off" -eq 0 ]; then
-      local td; td=$($DATE +%-d)
-      body=$(printf '%s' "$body" | @sed@ -E "s/(^| )($td)( |$)/\1[\2]\3/")
-    fi
-    chosen=$( { \
-      item "@tide@"    "󰃭" "Prev month"; \
-      item "@tide@"    "󰃭" "Next month"; \
-      item "@primary@" "󰸗" "Jump to today"; \
-      item "@fgMuted@" "󰁍" "Back"; \
-    } | $ROFI -dmenu -i -markup-rows -p "$ym" -mesg "<tt>$(esc "$body")</tt>" -markup -no-custom -format s)
-    case "$chosen" in
-      *Prev*) off=$((off - 1)) ;;
-      *Next*) off=$((off + 1)) ;;
-      *today*) off=0 ;;
-      *) return ;;
-    esac
-  done
-}
 
 today_details() {
   local now leap doy week left dow
   now=$($DATE +%s)
   dow=$($DATE +%A)
   doy=$($DATE +%-j)
-  week=$($DATE +%V)            # ISO week number
-  # Days remaining in the year.
+  week=$($DATE +%V)
   left=$(( ( $($DATE -d "$($DATE +%Y)-12-31" +%s) - now ) / 86400 ))
   if $DATE -d "$($DATE +%Y)-02-29" >/dev/null 2>&1; then leap="yes"; else leap="no"; fi
   info "Today" "$($DATE '+%A, %d %B %Y')
@@ -67,14 +43,16 @@ Unix time   $now"
 
 days_between() {
   local a b ea eb diff days weeks rem y m d sign last
-  a=$(ask "First date" "From which date?"); [ -z "$a" ] && return
-  b=$(ask "Second date" "To which date?");  [ -z "$b" ] && return
+  a="${1:-}"
+  [ -z "$a" ] && a=$(ask "First date" "From which date?")
+  [ -z "$a" ] && return
+  b=$(ask "Second date" "To which date?")
+  [ -z "$b" ] && return
   ea=$(to_epoch "$a"); eb=$(to_epoch "$b")
   if [ -z "$ea" ] || [ -z "$eb" ]; then info "Error" "Could not understand one of those dates."; return; fi
   diff=$(( eb - ea )); sign=""
   if [ "$diff" -lt 0 ]; then diff=$(( -diff )); sign="-"; fi
   days=$(( diff / 86400 )); weeks=$(( days / 7 )); rem=$(( days % 7 ))
-  # Calendar Y/M/D breakdown (orders the two dates first).
   local d1 d2; d1=$($DATE -d "$a" +%Y-%m-%d); d2=$($DATE -d "$b" +%Y-%m-%d)
   if [ "$ea" -gt "$eb" ]; then local t=$d1; d1=$d2; d2=$t; fi
   y=$(( $($DATE -d "$d2" +%Y) - $($DATE -d "$d1" +%Y) ))
@@ -95,8 +73,11 @@ Calendar   $sign$y years, $m months, $d days"
 
 shift_date() {
   local base off res
-  base=$(ask "Base date" "Start from which date? (blank = today)")
-  [ -z "$base" ] && base="today"
+  base="${1:-}"
+  if [ -z "$base" ]; then
+    base=$(ask "Base date" "Start from which date? (blank = today)")
+    [ -z "$base" ] && base="today"
+  fi
   off=$(ask "Offset" "e.g. +10 days, -3 weeks, 2 months, 1 year")
   [ -z "$off" ] && return
   res=$($DATE -d "$base $off" '+%A, %d %B %Y' 2>/dev/null)
@@ -108,7 +89,9 @@ shift_date() {
 
 weekday_of() {
   local d res
-  d=$(ask "Date"); [ -z "$d" ] && return
+  d="${1:-}"
+  [ -z "$d" ] && d=$(ask "Date")
+  [ -z "$d" ] && return
   res=$($DATE -d "$d" '+%A, %d %B %Y' 2>/dev/null)
   if [ -z "$res" ]; then info "Error" "Could not understand that date."; return; fi
   info "Day of week" "$res
@@ -117,7 +100,9 @@ ISO week $($DATE -d "$d" +%V) · day $($DATE -d "$d" +%-j) of the year"
 
 countdown() {
   local d ea now days res when
-  d=$(ask "Target date"); [ -z "$d" ] && return
+  d="${1:-}"
+  [ -z "$d" ] && d=$(ask "Target date")
+  [ -z "$d" ] && return
   ea=$(to_epoch "$d"); now=$($DATE +%s)
   if [ -z "$ea" ]; then info "Error" "Could not understand that date."; return; fi
   days=$(( (ea - now) / 86400 ))
@@ -146,28 +131,73 @@ unix_convert() {
   fi
 }
 
-# item COLOR ICON LABEL — a list row with an accent-coloured icon so each
-# category reads distinctly instead of one flat colour.
+day_details() {
+  local d norm now ea diff year_end left doy week dow quarter when
+  d="${1:-}"
+  [ -z "$d" ] && return
+  norm=$($DATE -d "$d" '+%Y-%m-%d' 2>/dev/null)
+  if [ -z "$norm" ]; then info "Error" "Could not understand that date."; return; fi
+  now=$($DATE +%s)
+  ea=$($DATE -d "$norm" +%s)
+  diff=$(( (ea - now) / 86400 ))
+  if [ "$diff" -gt 0 ]; then when="$diff days from today";
+  elif [ "$diff" -lt 0 ]; then when="$(( -diff )) days ago";
+  else when="today"; fi
+  doy=$($DATE -d "$norm" +%-j)
+  week=$($DATE -d "$norm" +%V)
+  dow=$($DATE -d "$norm" +%A)
+  quarter=$(( ($($DATE -d "$norm" +%-m) - 1) / 3 + 1 ))
+  year_end=$($DATE -d "$($DATE -d "$norm" +%Y)-12-31" +%s)
+  left=$(( (year_end - ea) / 86400 ))
+  info "Day" "$dow, $($DATE -d "$norm" '+%d %B %Y')
+
+ISO week    $week
+Quarter     Q$quarter
+Day of year $doy
+From today  $when
+Days left   $left in this year"
+}
+
+copy_date() {
+  local d="${1:-}"
+  [ -z "$d" ] && return
+  printf '%s' "$d" | "$WLCOPY"
+  "$NOTIFY" "Calendar" "Copied $d" 2>/dev/null || true
+}
+
 item() { printf '<span color="%s" weight="bold">%s</span>   %s\n' "$1" "$2" "$3"; }
 
-while :; do
+show_menu() {
+  local choice
   choice=$( { \
-    item "@primary@" "󰃭" "Calendar"; \
-    item "@tide@"    "󰸗" "Today in detail"; \
-    item "@violet@"  "󱢖" "Days between two dates"; \
-    item "@amber@"   "󰔠" "Add / subtract from a date"; \
-    item "@success@" "󱑎" "Day of the week"; \
+    item "@primary@" "󰃭" "Today in detail"; \
+    item "@tide@"    "󰸗" "Days between two dates"; \
+    item "@violet@"  "󱢖" "Add / subtract from a date"; \
+    item "@amber@"   "󰔠" "Day of the week"; \
     item "@coral@"   "󰥔" "Countdown to a date"; \
     item "@warning@" "󰓦" "Unix timestamp converter"; \
-  } | $ROFI -dmenu -i -markup-rows -p "Calendar" -no-custom -format s)
+    item "@fgMuted@" "󰁍" "Back"; \
+  } | $ROFI -dmenu -i -markup-rows -p "Date tools" -mesg "Date and time utilities" -markup -no-custom -format s )
   case "$choice" in
-    *Calendar)        show_calendar 0 ;;
-    *detail)          today_details ;;
-    *between*)        days_between ;;
-    *subtract*)       shift_date ;;
-    *week)            weekday_of ;;
-    *Countdown*)      countdown ;;
-    *converter)       unix_convert ;;
-    *) exit 0 ;;
+    *Today*)     today_details ;;
+    *between*)   days_between ;;
+    *subtract*)  shift_date ;;
+    *week*)      weekday_of ;;
+    *Countdown*) countdown ;;
+    *Unix*)      unix_convert ;;
+    *)           exit 0 ;;
   esac
-done
+}
+
+case "${1:-menu}" in
+  menu)      show_menu ;;
+  today)     today_details ;;
+  between)   days_between "${2:-}" ;;
+  shift)     shift_date "${2:-}" ;;
+  weekday)   weekday_of "${2:-}" ;;
+  countdown) countdown "${2:-}" ;;
+  unix)      unix_convert ;;
+  details)   day_details "${2:-}" ;;
+  copy)      copy_date "${2:-}" ;;
+  *)         show_menu ;;
+esac

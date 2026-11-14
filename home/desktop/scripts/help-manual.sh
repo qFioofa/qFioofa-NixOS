@@ -20,7 +20,8 @@ row() {
   row "Mod + V"                 "Clipboard history"
   row "Mod + Shift+W"           "Wi-Fi menu"
   row "Mod + Shift+B"           "Bluetooth menu"
-  row "Mod + Shift+C"           "Calendar & date tools"
+  row "Mod + Shift+C"           "Calendar (click a day for date actions)"
+  row "Calendar keys"           "←/→ month · ↑/↓ year · Enter select"
 
   head "󰖯   Windows" "@tide@"
   row "Mod + Q"                 "Close window"

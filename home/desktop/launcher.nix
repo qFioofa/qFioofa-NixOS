@@ -20,9 +20,9 @@ in
     # calc → math in the launcher; emoji → searchable emoji picker (Mod+Period).
     # Loaded into the wrapped finalPackage that the niri binds spawn.
     plugins = [ pkgs.rofi-calc pkgs.rofi-emoji ];
-    terminal = "foot";
-    font = "${font} 12";
-    extraConfig = {
+    settings = {
+      terminal = "foot";
+      font = "${font} 12";
       # Tabs in order (Alt+Right / Alt+Left or click to cycle):
       #   Apps   — plain app launch (default, what Mod+D opens)
       #   Apps + — combi: run-commands + files (NOT apps — keeps it distinct

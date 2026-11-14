@@ -53,7 +53,7 @@ in
     argument = "${defaultState}";
   };
 
-  programs.regreet = {
+  services.displayManager.regreet = {
     enable = true;
     package = pkgsRegreet.regreet;
 

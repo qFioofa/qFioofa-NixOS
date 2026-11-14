@@ -1,0 +1,120 @@
+* {
+  foreground:            @fg@;
+  background:            @bg@;
+  foreground-normal:     @fgDim@;
+  background-normal:     @bg@;
+  foreground-urgent:     @violet@;
+  background-urgent:     @bg@;
+  foreground-active:     @primary@;
+  background-active:     @bg@;
+  foreground-select:     @primary@;
+  background-select:     @bgSurface@;
+  border:                @bgSurface@;
+
+  font: "@font@ 12";
+  background-color: transparent;
+  text-color: @fg@;
+}
+
+#window {
+  width:           calc(90% min 560px);
+  border:          @border@;
+  border-color:    @primary@;
+  border-radius:   @radius@;
+  background-color: @bg@;
+  location:        center;
+}
+
+#mainbox {
+  padding:          14px;
+  spacing:          10px;
+  background-color: transparent;
+}
+
+#inputbar {
+  padding:          8px 12px;
+  spacing:          8px;
+  border-radius:    @radiusInner@;
+  background-color: @bgSurface@;
+  text-color:       @fg@;
+  children:         [ prompt, entry ];
+}
+
+#prompt {
+  text-color: @primary@;
+}
+
+#entry {
+  placeholder:       "Type a month or day…";
+  placeholder-color: @fgMuted@;
+  text-color:        @fg@;
+}
+
+#message {
+  padding:          10px 12px;
+  border-radius:    @radiusInner@;
+  background-color: @bgSurface@;
+  text-color:       @fg@;
+}
+
+#textbox {
+  text-color:       @fg@;
+  background-color: transparent;
+}
+
+#listview {
+  columns:          7;
+  lines:            8;
+  spacing:          3px;
+  padding:          4px 0 0 0;
+  scrollbar:        false;
+  background-color: transparent;
+}
+
+#element {
+  padding:          8px 6px 6px 6px;
+  border-radius:    @radiusInner@;
+  background-color: transparent;
+  text-color:       @fgDim@;
+  horizontal-align: true;
+}
+
+#element.normal.normal {
+  background-color: transparent;
+  text-color:       @fgDim@;
+}
+
+#element.normal.urgent {
+  background-color: transparent;
+  text-color:       @violet@;
+}
+
+#element.normal.active {
+  background-color: transparent;
+  text-color:       @primary@;
+}
+
+#element.selected.normal {
+  background-color: @bgSurface@;
+  text-color:       @primary@;
+}
+
+#element.selected.urgent {
+  background-color: @bgSurface@;
+  text-color:       @violet@;
+}
+
+#element.selected.active {
+  background-color: @bgSurface@;
+  text-color:       @primary@;
+}
+
+#element.alternate.normal {
+  background-color: transparent;
+  text-color:       @fgDim@;
+}
+
+#element-text {
+  text-color:       inherit;
+  vertical-align:   0.5;
+}

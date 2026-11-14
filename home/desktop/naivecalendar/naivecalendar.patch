@@ -1,0 +1,107 @@
+--- a/src/naivecalendar.py
++++ b/src/naivecalendar.py
+@@ -990,17 +990,26 @@
+ 
+     (list <theme>.cfg SHORTCUTS section entries)"""
+ 
+-    menu = '\n'.join([to_list(cfg_t['SHORTCUTS'][s])[-1] for s in cfg_t['SHORTCUTS']])
++    menu = '\n'.join(
++        to_list(cfg_t['SHORTCUTS'][s])[-1]
++        for s in ('SYM_SHOW_HELP', 'SYM_GO_TODAY')
++    )
+     menu += '\n' + '\n'.join([act['sym'][-1] for act in CUSTOM_ACTIONS.values()])
+     output = rofi_popup("menu", menu, nb_lines=7, width='20em')
+     process_event_popup(output, cdate)
+ 
+ 
+-#@open_n_reload_rofi
++@open_n_reload_rofi
+ def open_event(day_sym, date, editor):
+     """open event with editor for the selected date"""
+ 
+     day_ind = strip_list(SYMS_DAYS_NUM).index(day_sym) +1
++    day_command = os.environ.get('NAIVECALENDAR_DAY_COMMAND')
++    if not day_command:
++        return
++    iso_date = datetime.date(date.year, date.month, day_ind).isoformat()
++    subprocess.run([day_command, iso_date])
++    return
+ 
+     date_format = str(EVENTS_PATHS[EVENTS_DEFAULT])
+     event_path = datetime.date(date.year, date.month, day_ind).strftime(date_format)
+@@ -1064,7 +1072,7 @@
+     elif (SCRIPT_PATHS['rel'] / cmd_path).exists():
+         cmd = [str(SCRIPT_PATHS['rel'] / cmd_path)] + cmd[1:]
+ 
+-    subprocess.Popen(cmd)
++    subprocess.run(cmd)
+ 
+ def set_pp_date(day, date, f):
+     """write date to cache with command line specified format"""
+@@ -1082,8 +1090,8 @@
+ def send2clipboard(day, date, f):
+     """return select date to stdout given cmd line parameter '--format'"""
+ 
+-    if shutil.which("xclip") == None:
+-        print("\nplease install xclip to use 'copy-to-clipboard' option (-x/--clipboard)\n", file=sys.stderr)
++    if shutil.which("wl-copy") == None:
++        print("\nplease install wl-clipboard to use 'copy-to-clipboard' option (-x/--clipboard)\n", file=sys.stderr)
+         sys.exit(0)
+ 
+     d = int(day)
+@@ -1092,7 +1100,7 @@
+ 
+     pretty_date = datetime.date(y, m, d).strftime(f)
+     p = subprocess.Popen(('echo', pretty_date), stdout=subprocess.PIPE)
+-    subprocess.check_output(('xclip', '-selection', 'clipboard'), stdin=p.stdout)
++    subprocess.check_output(('wl-copy',), stdin=p.stdout)
+ 
+     sys.exit(0)
+ 
+@@ -1110,18 +1118,15 @@
+     if not os.path.exists(SCRIPT_PATHS['user']):
+         os.makedirs(SCRIPT_PATHS['user'])
+ 
+-    for events_path in EVENTS_PATHS.values():
+-        if not os.path.exists(events_path.parent):
+-            os.makedirs(events_path.parent)
++    # Events are intentionally disabled in this build; do not create note folders.
+ 
+     if not os.path.exists(CACHE_PATH):
+-        os.mkdir(CACHE_PATH)
++        os.makedirs(CACHE_PATH)
+         date = datetime.date.today()
+         date_buff = configparser.ConfigParser()
+         date_buff["buffer"] = {"year": date.year, "month": date.month}
+         with open(DATE_CACHE, 'w') as date_cache:
+             date_buff.write(date_cache)
+-        display_help(head_txt="Welcome to naivecalendar")
+ 
+ 
+ class CacheDate:
+--- a/src/naivecalendar.sh
++++ b/src/naivecalendar.sh
+@@ -2,6 +2,6 @@
+ 
+ param="$(printf ' %q' "$@")"
+-if [ -z "$@" ]; then
++if [ $# -eq 0 ]; then
+     cmd="${BASH_SOURCE%/*}/naivecalendar.py"
+ else
+     cmd="${BASH_SOURCE%/*}/naivecalendar.py $(printf ' %q' "$@")"
+@@ -177,14 +177,13 @@
+     # print date to stdout
+     if [ "$IS_CLIPBOARD" = "true" ]; then
+         FILE="$HOME/.cache/naivecalendar/pretty_print_cache.txt"
+-        cat $FILE | xclip -selection clipboard &
++        cat $FILE | wl-copy &
+     fi
+ 
+     # print date to stdout
+     if [ "$IS_PRINT" = "true" ]; then
+         FILE="$HOME/.cache/naivecalendar/pretty_print_cache.txt"
+-        cat $FILE > "$HOME/temp.txt"
+-        printf "%s" "$(cat $FILE)"
++        [ -f "$FILE" ] && printf "%s" "$(cat $FILE)"
+     fi
+ fi

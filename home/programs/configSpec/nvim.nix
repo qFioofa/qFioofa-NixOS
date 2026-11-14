@@ -20,7 +20,7 @@ let
       neovim
       stdenv.cc.cc.lib zlib openssl ncurses icu
       nodejs python3 go jdk21
-      gcc gnumake curl wget git unzip gzip gnutar ripgrep fd
+      gcc gnumake curl wget git unzip gzip gnutar ripgrep fd tree-sitter
     ];
     profile = ''
       export LD_LIBRARY_PATH=/usr/lib:/usr/lib64''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}

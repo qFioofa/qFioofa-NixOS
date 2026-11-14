@@ -10,7 +10,7 @@
   text-color:       @fg;
 }
 window {
-  width:         420px;
+  width:         calc(90% min 560px);
   border:        2px;
   border-color:  @accent;
   border-radius: 12px;
@@ -43,9 +43,11 @@ textbox {
   text-color: @fg;
 }
 listview {
-  lines:    8;
-  spacing:  4px;
-  scrollbar: false;
+  lines:        8;
+  fixed-height: false;
+  dynamic:      true;
+  spacing:      4px;
+  scrollbar:    false;
   background-color: transparent;
 }
 element {
