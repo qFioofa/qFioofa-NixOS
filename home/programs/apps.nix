@@ -44,6 +44,7 @@ in
     zed-editor
     jetbrains.idea
     jetbrains.ruby-mine
+    android-studio
     postman
 
     remmina

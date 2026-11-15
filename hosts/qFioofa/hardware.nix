@@ -3,6 +3,8 @@
   imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
 
   boot.initrd.availableKernelModules = [ "xhci_pci" "nvme" "usb_storage" "sd_mod" ];
+  # KVM hardware acceleration for the Android Emulator (VT-x on this CPU).
+  boot.kernelModules = [ "kvm-intel" ];
   fileSystems."/" = {
     device = "/dev/disk/by-label/root";
     fsType = "ext4";

@@ -90,6 +90,7 @@
     gcc                # C/C++ compiler
     dotnet-sdk         # C# compiler / .NET SDK
     kotlin             # Kotlin compiler
+    android-tools      # adb, fastboot, avdmanager for Android Studio / devices
     nodejs             # JavaScript runtime / compiler
     typst              # markup-based typesetting compiler (tinymist LSP in nvim)
     gnumake            # make

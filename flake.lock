@@ -55,11 +55,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1783266827,
-        "narHash": "sha256-Ra9nSpxfMlZE4RUx6VOZh+G2ZI37PhodI9orsnooDTY=",
+        "lastModified": 1794738478,
+        "narHash": "sha256-N/TYdN9LY6A76JYZJM9q5qU7CLwopGRRvIBuSiOz5jc=",
         "owner": "qFioofa",
         "repo": "qFioofa-Ghostty",
-        "rev": "4d84a8fd8bc39dd98826323c79a3795a2936b4fa",
+        "rev": "7ff05f9ac751c3d39235340dc4f8d71bfe6c7306",
         "type": "github"
       },
       "original": {
@@ -97,11 +97,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794278858,
-        "narHash": "sha256-rkrJwLgLSHBnXfgoSKIDa+2LLGdTqynsV3GAxOTGhUU=",
+        "lastModified": 1794715309,
+        "narHash": "sha256-awkBBs5ctFKgEYjpNGpi3t/VqF589n5EWfdinRb2gNI=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "82ce401aa350502897c3f2e85f384d61cd3b0b6d",
+        "rev": "a1293da7dd8e497e08d26173f97e2976b36a31ea",
         "type": "github"
       },
       "original": {
@@ -112,11 +112,11 @@
     },
     "lazygit-config": {
       "locked": {
-        "lastModified": 1789394507,
-        "narHash": "sha256-9nzDbfGtX188dD8yTLIwfGTIZrEHzCm41buvJG7Bpag=",
+        "lastModified": 1794740745,
+        "narHash": "sha256-4Ztrd7Khbg30fY/wKTjNGZGjBkJKLQxQEIfX/pG2I0g=",
         "owner": "qFioofa",
         "repo": "qFioofa-LazyGit",
-        "rev": "e5b930a7865ff1540fdd29dd932cdbce418a15a7",
+        "rev": "747ce64477d60cad3000e9728bef5ddda040486e",
         "type": "github"
       },
       "original": {
@@ -359,11 +359,11 @@
         "nixpkgs-nvim": "nixpkgs-nvim_2"
       },
       "locked": {
-        "lastModified": 1794405709,
-        "narHash": "sha256-Zh3KxfGSRU4aJE8S+R7QOVQ05imx4/1lkc33aogS7VM=",
+        "lastModified": 1794699039,
+        "narHash": "sha256-pBkAH8Ow3XywuYxDYk/UJhIEvYzoKkm6dqPUYjCQ2fU=",
         "owner": "qFioofa",
         "repo": "qFioofa-Nvim",
-        "rev": "211b9876268f4526087ae4057bb43305303a080f",
+        "rev": "f147b706975d3c7cf9484377aaa65a68af8a2546",
         "type": "github"
       },
       "original": {
@@ -466,11 +466,11 @@
     },
     "tmux-config": {
       "locked": {
-        "lastModified": 1783266788,
-        "narHash": "sha256-HnY4RfAzg6hkx1nozFtilxHNjThlTIi5hJ03uF+s1h0=",
+        "lastModified": 1794740935,
+        "narHash": "sha256-+TFj5Z+OE2BRNKyANPB88rl6hSPEUqZtLSnk2AfYmpM=",
         "owner": "qFioofa",
         "repo": "qFioofa-tmux",
-        "rev": "ba99847ca3d2f630cc7dd1d22aa1e1ccf32cd07f",
+        "rev": "e611fcd63967ecbda1ffc3e29114069d63284e8d",
         "type": "github"
       },
       "original": {
@@ -529,11 +529,11 @@
     },
     "zsh-config": {
       "locked": {
-        "lastModified": 1792585991,
-        "narHash": "sha256-Yt/QkMHzkU2h2egkoq5ewcNNTKBiUFTOFUpDrhJuo3g=",
+        "lastModified": 1794678082,
+        "narHash": "sha256-emVtk4EXEFFzkP3WgJx2OtSSeCTnLFYcTEslZo5x0eU=",
         "owner": "qFioofa",
         "repo": "qFioofa-zsh",
-        "rev": "57d2151afa61e1fe536ee47433a041600f798ba6",
+        "rev": "e29b9e54f378093a3323ff3c2342f2d9d234408a",
         "type": "github"
       },
       "original": {
