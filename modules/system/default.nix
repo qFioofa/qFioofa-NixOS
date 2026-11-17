@@ -2,6 +2,7 @@
 {
   imports = [
     ./boot.nix
+    ./memory.nix
     ./plymouth.nix
     ./locale.nix
     ./networking.nix
