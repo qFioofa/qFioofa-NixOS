@@ -21,6 +21,9 @@ let
       stdenv.cc.cc.lib zlib openssl ncurses icu
       nodejs python3 go jdk21
       gcc gnumake curl wget git unzip gzip gnutar ripgrep fd tree-sitter
+      # snacks.image shells out to `magick`/`convert`/`identify` for every
+      # placement (PNG included), so images fail to render without it.
+      imagemagick
     ];
     profile = ''
       export LD_LIBRARY_PATH=/usr/lib:/usr/lib64''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}

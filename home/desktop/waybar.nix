@@ -138,9 +138,10 @@ in
         modules = [ "backlight" "backlight/slider" ];
       };
       # System load capsule: CPU + memory, click opens btop in a terminal.
+      # The lock toggles the memory guard (earlyoom/oomd + kernel watermarks).
       "group/right-sys" = {
         orientation = "horizontal";
-        modules = [ "cpu" "memory" ];
+        modules = [ "cpu" "memory" "custom/memory-mode" ];
       };
       # Status + system capsule.
       "group/right-b" = {
@@ -279,6 +280,18 @@ in
           critical = 90;
         };
         on-click = "ghostty -e btop";
+      };
+
+      # Memory guard switch: locked = protection on, unlocked = off.
+      # Clicking asks systemd to run memory-mode.service; the polkit rule in
+      # modules/system/memory.nix authorizes that one unit for wheel users.
+      "custom/memory-mode" = {
+        exec = "memory-mode status";
+        interval = 10;
+        return-type = "json";
+        format = "{}";
+        tooltip = true;
+        on-click = "systemctl start memory-mode.service";
       };
 
       network = {

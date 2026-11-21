@@ -13,5 +13,6 @@
     ./plantuml.nix
     ./lite-xl.nix
     ./tg-ws-proxy.nix
+    ./tele.nix
   ];
 }

@@ -48,6 +48,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # tele — terminal-native Telegram client. Not in the pinned nixpkgs, so it
+    # comes from the upstream flake; pinned to a release tag so `nix flake
+    # update` can't drag it forward. nixpkgs follows the pinned revision above
+    # to avoid a second copy in the closure.
+    tele = {
+      url = "github:sorokin-vladimir/tele/v2.1.3";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Herdr — terminal workspace manager for AI coding agents. Official Nix
     # support is a flake that builds from source; pinned to a release tag so
     # `nix flake update` can't drag it forward. nixpkgs follows the pinned

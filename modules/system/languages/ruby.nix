@@ -62,7 +62,7 @@ in {
   # role. Keep this list conflict-free: every tool here must satisfy its
   # dependencies from this one combined gem environment.
   environment.systemPackages = with pkgs; [
-    ruby_4_0
+    ruby_3_3
 
     # Exact Ruby 3.1.2 for control-objects; use `ruby312 <command>`.
     ruby312-wrapper

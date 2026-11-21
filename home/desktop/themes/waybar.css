@@ -189,6 +189,7 @@ tooltip {
 #backlight,
 #idle_inhibitor,
 #custom-player,
+#custom-memory-mode,
 #cpu,
 #memory {
   padding: 0 10px;
@@ -280,3 +281,12 @@ tooltip {
 }
 #memory.warning { color: @warning@; }
 #memory.critical { color: @error@; }
+
+/* Memory guard toggle: green while protection is on, muted when disabled. */
+#custom-memory-mode {
+  margin: 6px 0;
+  border-left: 1px solid @bgSurface@;
+  color: @success@;
+}
+#custom-memory-mode.disabled { color: @fgMuted@; }
+#custom-memory-mode:hover { color: @fg@; }

@@ -20,6 +20,60 @@ let
         name = "dsp_basefw.bin";
       }} "$out/lib/firmware/intel/avs/tgl/dsp_basefw.bin"
     '';
+
+  # Shared by the normal HDA path and the AVS->HDA fallback. It fixes both
+  # halves of the old BOD-WXX9 workaround:
+  #   1. re-declares pin 0x19 as a fixed internal mic with no jack presence, so
+  #      ACP/WirePlumber always exposes the capture port and makes it the
+  #      default source (otherwise the port is "unavailable" with no headset
+  #      plugged and applications report that there is no microphone);
+  #   2. re-applies the VREF bias, input mux and capture switch that the generic
+  #      HDA parser leaves off, so the port actually records audio.
+  hdaMicFix = pkgs.writeShellScript "huawei-hda-mic-fix" ''
+    card=
+    hw=
+    i=0
+    while [ "$i" -lt 30 ]; do
+      card=$(sed -n 's/^ *\([0-9]\+\) \[.*/\1/p' /proc/asound/cards 2>/dev/null | head -n1)
+      if [ -n "$card" ] && [ -e "/dev/snd/hwC''${card}D0" ]; then
+        hw="/dev/snd/hwC''${card}D0"
+        break
+      fi
+      i=$((i + 1))
+      sleep 1
+    done
+
+    if [ -z "$hw" ]; then
+      echo "HDA codec hwdep not found; skipping microphone fix"
+      exit 0
+    fi
+
+    # One "nid cfg" pair per write: the sysfs parser only reads the first pair.
+    printf '0x19 0x83a11120\n' > "/sys/class/sound/hwC''${card}D0/user_pin_configs" || true
+
+    # Reconfig needs the codec idle. At boot the service runs before the
+    # greeter, but retry anyway in case a userspace daemon grabbed the card.
+    i=0
+    while [ "$i" -lt 10 ]; do
+      if echo 1 > "/sys/class/sound/hwC''${card}D0/reconfig" 2>/dev/null; then
+        break
+      fi
+      i=$((i + 1))
+      sleep 1
+    done
+
+    # Pin 0x19: input + VREF 80 so the microphone gets bias.
+    hda-verb "$hw" 0x19 0x707 0x24 || true
+    # Converter 0x13: select node 0x19 and unmute its input amp (gain 0x50).
+    hda-verb "$hw" 0x13 0x701 0x1 || true
+    hda-verb "$hw" 0x13 0x3b0 0x50 || true
+
+    # `amixer sset Capture 100% unmute` leaves the switch off on this codec, so
+    # set the switch explicitly by name.
+    amixer -c "$card" sset Capture 100% >/dev/null 2>&1 || true
+    amixer -c "$card" cset name='Capture Switch' on >/dev/null 2>&1 || true
+    amixer -c "$card" sset 'Mic Boost' 2 >/dev/null 2>&1 || true
+  '';
 in
 {
   options.hardware.huawei.matebook = {
@@ -53,10 +107,11 @@ in
       default = null;
       example = "./firmware/dsp_fw_release.bin";
       description = ''
-        Path to the Tiger Lake AVS base firmware (`dsp_fw_release.bin`)
-        extracted from Huawei's Windows ISST package
-        (Fw/dsp_fw_release.bin inside HUAWEI_Matebook_D_15_2022_ISST_*.zip).
-        It is installed as intel/avs/tgl/dsp_basefw.bin.
+        Path to the Tiger Lake AVS base firmware (`dsp_fw_release.bin`).
+        It is shipped in Huawei's Windows OED/ISST driver
+        (`IntcOED.inf_*/Fw/dsp_fw_release.bin` in the DriverStore, also inside
+        HUAWEI_Matebook_D_15_2022_ISST_*.zip) and is installed as
+        intel/avs/tgl/dsp_basefw.bin.
 
         Required when audioDriver = "avs". This blob is not shipped by
         linux-firmware: without it AVS cannot boot the DSP, so the internal
@@ -71,12 +126,16 @@ in
       type = lib.types.bool;
       default = true;
       description = ''
-        Enable the Conexant SN6140 analog capture path with hda-verb — the
-        microphone half of the Ubuntu "ESSX8336 ACPI ghost" workaround for
-        BOD-WXX9. The generic HDA parser leaves the Mic pin biased at VREF_HIZ
-        and its input amp muted, so the card exists but records silence. Only
-        applied when audioDriver = "hda". This fixes the analog/headset mic;
-        the internal DMIC is a separate DSP path and needs audioDriver = "avs".
+        Enable the Conexant SN6140 analog capture path with hda-verb and
+        re-declare pin 0x19 as a fixed, always-present internal mic (no jack
+        presence detection). This is the microphone half of the Ubuntu
+        "ESSX8336 ACPI ghost" workaround for BOD-WXX9: the generic HDA parser
+        leaves the pin biased at VREF_HIZ, its input amp muted, and marks the
+        port unavailable when no headset is plugged, so the card exists but
+        applications see no microphone. Only applied when audioDriver = "hda";
+        the AVS path applies the same script as a fallback. This fixes the
+        analog/headset mic; the internal DMIC is a separate DSP path and needs
+        audioDriver = "avs".
       '';
     };
 
@@ -173,52 +232,24 @@ in
         avsFirmwarePackage;
 
     # --- Microphone: analog capture path on the Conexant codec ----------------
-    # Ubuntu's fix for BOD-WXX9 units (the ESSX8336 "ACPI ghost" workaround)
-    # does not just switch to HDA: it also re-biases the Mic pin and unmutes the
-    # input amp with hda-verb. The generic HDA parser leaves them at VREF_HIZ /
-    # muted, so the capture device shows up but records only silence. The
-    # commands below mirror that fix (node 0x19 = Mic pin, node 0x13 = input
-    # converter/mux on the SN6140).
+    # Used when audioDriver = "hda" and as the AVS fallback below. The full
+    # workaround lives in hdaMicFix: it makes pin 0x19 an always-available fixed
+    # mic, re-biases it with VREF 80, selects it on the input mux and turns the
+    # capture switch on.
     systemd.services.huawei-mic-fix = lib.mkIf (cfg.audioDriver == "hda" && cfg.micFix) {
       description = "Enable Huawei Matebook Conexant SN6140 analog microphone";
       wantedBy = [ "multi-user.target" ];
       wants = [ "sound.target" ];
       after = [ "sound.target" ];
+      # Run before the greeter/session so reconfig sees the codec idle.
+      before = [ "greetd.service" "display-manager.service" ];
       path = [ pkgs.coreutils pkgs.gnused pkgs.alsa-tools pkgs.alsa-utils ];
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
       };
       script = ''
-        # The HDA card can appear a little after sound.target; wait for its
-        # codec hwdep node instead of racing udev.
-        card=
-        hw=
-        i=0
-        while [ "$i" -lt 30 ]; do
-          card=$(sed -n 's/^ *\([0-9]\+\) \[.*/\1/p' /proc/asound/cards 2>/dev/null | head -n1)
-          if [ -n "$card" ] && [ -e "/dev/snd/hwC''${card}D0" ]; then
-            hw="/dev/snd/hwC''${card}D0"
-            break
-          fi
-          i=$((i + 1))
-          sleep 1
-        done
-
-        if [ -z "$hw" ]; then
-          echo "HDA codec hwdep not found; skipping microphone fix"
-          exit 0
-        fi
-
-        # Pin 0x19: input + VREF 80 so the microphone gets bias.
-        hda-verb "$hw" 0x19 0x707 0x24 || true
-        # Converter 0x13: select node 0x19 and unmute its input amp (gain 0x50).
-        hda-verb "$hw" 0x13 0x701 0x1 || true
-        hda-verb "$hw" 0x13 0x3b0 0x50 || true
-
-        # Keep the userspace mixer consistent with the verbs above.
-        amixer -c "$card" sset Capture 100% unmute || true
-        amixer -c "$card" sset 'Mic Boost' 2 || true
+        ${hdaMicFix}
       '';
     };
 
@@ -249,13 +280,81 @@ in
       '';
     };
 
+    # --- AVS fallback: never leave the machine without a sound card -----------
+    # The Huawei AVS firmware only boots when the DSP is in a clean state; on
+    # some board revisions it fails with `transfer fw failed`. If AVS produced
+    # no card, reload legacy HDA and apply the analog-mic workaround so the
+    # speakers still work. On resume this also re-applies the HDA fix when the
+    # fallback path was taken at boot.
+    systemd.services.huawei-avs-fallback = lib.mkIf (cfg.audioDriver == "avs") {
+      description = "Fall back to legacy HDA if Huawei AVS registers no sound card";
+      wantedBy = [ "multi-user.target" ];
+      wants = [ "sound.target" ];
+      after = [ "sound.target" ];
+      before = [ "greetd.service" "display-manager.service" ];
+      path = [ pkgs.coreutils pkgs.gnused pkgs.gnugrep pkgs.kmod
+               pkgs.alsa-tools pkgs.alsa-utils ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+      };
+      script = ''
+        driver() {
+          basename "$(readlink -f /sys/bus/pci/devices/0000:00:1f.3/driver 2>/dev/null)" 2>/dev/null || true
+        }
+        has_card() {
+          grep -q '^ *[0-9]\+ \[' /proc/asound/cards 2>/dev/null
+        }
+
+        # Give AVS up to 20s: the firmware load has a 3s timeout, but the card
+        # is registered slightly later. If HDA is already bound (resume after a
+        # previous fallback), skip the wait and re-apply the fix immediately.
+        i=0
+        while [ "$i" -lt 20 ]; do
+          # HDA already bound (resume after a previous fallback): re-apply the
+          # HDA mic fix below instead of exiting.
+          if [ "$(driver)" = "snd_hda_intel" ]; then
+            break
+          fi
+          # AVS bound and a card registered: AVS won, nothing to do.
+          if has_card; then
+            exit 0
+          fi
+          i=$((i + 1))
+          sleep 1
+        done
+
+        if [ "$(driver)" != "snd_hda_intel" ]; then
+          echo "AVS registered no sound card; reloading legacy HDA"
+          # Peel the AVS/audio modules so snd_intel_dspcfg can be reloaded with
+          # dsp_driver=1. SOF modules may also hold it, hence the retries.
+          n=0
+          while [ "$n" -lt 6 ]; do
+            n=$((n + 1))
+            for m in $(lsmod | sed -n 's/^\(snd[^ ]*\).*/\1/p'); do
+              modprobe -r "$m" 2>/dev/null || true
+            done
+            if ! lsmod | grep -q '^snd_intel_dspcfg'; then
+              break
+            fi
+            sleep 1
+          done
+          modprobe snd_intel_dspcfg dsp_driver=1 2>/dev/null || true
+          modprobe snd_hda_intel 2>/dev/null || true
+          sleep 1
+        fi
+
+        ${hdaMicFix}
+      '';
+    };
+
     # Re-apply the hardware state after resume; the HDA/AVS codec can reset the
     # pin bias and amp values across suspend.
     powerManagement.resumeCommands = lib.optionalString
       (cfg.audioDriver == "hda" && cfg.micFix)
       "systemctl restart huawei-mic-fix.service"
       + lib.optionalString (cfg.audioDriver == "avs")
-      "systemctl restart huawei-avs-mic-gain.service";
+      "systemctl restart huawei-avs-mic-gain.service; systemctl restart huawei-avs-fallback.service";
 
     # --- Camera: Intel IPU6 MIPI webcam (no /dev/video*, black image) ---------
     # Recent Matebooks (X Pro, 14s, D16 2024…) use an Intel IPU6 MIPI sensor
