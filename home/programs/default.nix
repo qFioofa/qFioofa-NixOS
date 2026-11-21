@@ -10,6 +10,7 @@
     ./configSpec
     ./cli.nix
     ./ai.nix
+    ./dictation.nix
     ./plantuml.nix
     ./lite-xl.nix
     ./tg-ws-proxy.nix

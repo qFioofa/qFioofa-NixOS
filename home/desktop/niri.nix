@@ -253,6 +253,7 @@ in
 
     spawn-at-startup = [
       { command = [ "waybar" ]; }
+      { command = [ "${pkgs.handy}/bin/handy" "--start-hidden" ]; }
       # swayosd-server is the OSD backend for the XF86Audio*/XF86MonBrightness*
       # binds below. Started here (not via its home-manager systemd unit), in
       # the same session as waybar/swaybg, so WAYLAND_DISPLAY is guaranteed to
@@ -284,6 +285,8 @@ in
       # path to make the binds fire regardless of PATH.
       "Mod+Escape".action = spawn "${config.home.profileDirectory}/bin/wlogout-toggle";
       "Mod+Alt+L".action = spawn "${config.home.profileDirectory}/bin/lock";
+      "Shift+Alt+D".action = spawn "${pkgs.handy}/bin/handy" "--toggle-transcription";
+      "Shift+Alt+C".action = spawn "${pkgs.handy}/bin/handy" "--cancel";
 
       "Mod+V".action = spawn "${config.home.profileDirectory}/bin/clipboard-menu";
 
